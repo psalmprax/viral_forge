@@ -122,6 +122,25 @@ function TransformationPageContent() {
         return `${API_BASE}/static/${filename}`;
     };
 
+    const handleAbort = async (id: string) => {
+        try {
+            const token = localStorage.getItem("vf_token");
+            const res = await fetch(`${API_BASE}/video/jobs/${id}/abort`, {
+                method: "POST",
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            if (res.ok) {
+                const updated = await res.json();
+                setProcessingJobs(prev => prev.map(j => j.id === id ? { ...j, status: "Aborted" } : j));
+                if (selectedJob?.id === id) {
+                    setSelectedJob(prev => prev ? { ...prev, status: "Aborted" } : null);
+                }
+            }
+        } catch (error) {
+            console.error("Failed to abort job:", error);
+        }
+    };
+
     React.useEffect(() => {
         const fetchData = async () => {
             try {
@@ -512,7 +531,20 @@ function TransformationPageContent() {
                                                     )}
                                                 </div>
                                                 <div className="flex-1 min-w-0 space-y-3">
-                                                    <h4 className="font-black text-sm tracking-tight truncate uppercase text-white">{job.title || "VIRAL_TRANSFORM_1"}</h4>
+                                                    <div className="flex items-center justify-between gap-2">
+                                                        <h4 className="font-black text-sm tracking-tight truncate uppercase text-white">{job.title || "VIRAL_TRANSFORM_1"}</h4>
+                                                        {job.status !== "Completed" && job.status !== "Failed" && job.status !== "Aborted" && (
+                                                            <button
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    handleAbort(job.id);
+                                                                }}
+                                                                className="text-[8px] font-black text-rose-500 hover:text-rose-400 uppercase tracking-widest px-2 py-1 rounded-md border border-rose-500/20 hover:border-rose-500/50 transition-all"
+                                                            >
+                                                                Abort
+                                                            </button>
+                                                        )}
+                                                    </div>
                                                     <div className="space-y-2">
                                                         <div className="flex justify-between text-[8px] font-black uppercase tracking-widest text-zinc-500">
                                                             <span>{job.status}</span>

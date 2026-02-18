@@ -61,3 +61,40 @@ async def list_jobs(current_user: UserDB = Depends(get_current_user)):
         return jobs
     finally:
         db.close()
+@router.post("/jobs/{job_id}/abort")
+async def abort_job(job_id: str, current_user: UserDB = Depends(get_current_user)):
+    """
+    Aborts a running transformation job by revoking the Celery task.
+    """
+    from api.utils.celery import celery_app
+    db = SessionLocal()
+    try:
+        job = db.query(VideoJobDB).filter(VideoJobDB.id == job_id).first()
+        if not job:
+            raise HTTPException(status_code=404, detail="Job not found")
+        
+        # User isolation
+        if current_user.role != "admin" and job.user_id != current_user.id:
+            raise HTTPException(status_code=403, detail="Not authorized to abort this job")
+
+        # Revoke Celery Task
+        celery_app.control.revoke(job_id, terminate=True)
+        
+        # Update Database
+        job.status = "Aborted"
+        db.commit()
+
+        # Notify Dashboard via WebSocket
+        from api.routes.ws import notify_job_update_sync
+        notify_job_update_sync({
+            "id": job_id,
+            "status": "Aborted",
+            "progress": job.progress,
+            "output_path": job.output_path
+        })
+
+        return {"status": "Aborted", "message": f"Job {job_id} revocation signal transmitted."}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        db.close()
