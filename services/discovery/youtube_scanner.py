@@ -135,7 +135,7 @@ class YouTubeShortsScanner(TrendScanner):
             ContentCandidate(
                 id=f"yt_mock_{i}",
                 platform="YouTube Shorts",
-                url=f"https://youtube.com/shorts/mock_{i}",
+                url=f"http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
                 author=f"Creator_{i}",
                 title=f"The Future of AI in {niche}",
                 view_count=random.randint(50000, 1000000),
@@ -145,7 +145,7 @@ class YouTubeShortsScanner(TrendScanner):
                 viral_score=random.randint(40, 95),
                 duration_seconds=float(random.randint(15, 60)),
                 tags=["AI", niche, "Tech", "Viral"],
-                thumbnail_url=f"https://picsum.photos/seed/{i}/320/180"
+                thumbnail_url=f"http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/images/ForBiggerBlazes.jpg"
             )
             for i in range(3)
         ]

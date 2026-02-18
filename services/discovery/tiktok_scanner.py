@@ -128,7 +128,7 @@ class TikTokScanner:
             ContentCandidate(
                 id=f"tt_ref_{i}",
                 platform="TikTok",
-                url=f"https://www.tiktok.com/@trending/video/730000000000000000{i}",
+                url=f"http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4",
                 author="Trending",
                 title=f"Sample: {niche} Trend",
                 description="Live scraping temporarily throttled. Showing historical sample.",
