@@ -1,77 +1,91 @@
 import os
 import logging
+import boto3
 from api.config import settings
 from typing import Optional
 
 class StorageService:
     def __init__(self):
-        self.use_s3 = bool(settings.AWS_ACCESS_KEY_ID and settings.AWS_SECRET_ACCESS_KEY and settings.AWS_STORAGE_BUCKET_NAME)
+        self.provider = settings.STORAGE_PROVIDER.upper()
+        self.bucket = settings.STORAGE_BUCKET
         self.s3_client = None
         
-        if self.use_s3:
-            try:
-                import boto3
-                self.s3_client = boto3.client(
-                    's3',
-                    aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
-                    aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
-                    region_name=settings.AWS_REGION
-                )
-                logging.info(f"[StorageService] Initialized S3 storage (Bucket: {settings.AWS_STORAGE_BUCKET_NAME})")
-            except ImportError:
-                logging.error("[StorageService] boto3 not installed, falling back to local storage")
-                self.use_s3 = False
-            except Exception as e:
-                logging.error(f"[StorageService] Failed to initialize S3: {e}")
-                self.use_s3 = False
-        else:
-            logging.info("[StorageService] Initialized Local storage (No AWS credentials provided)")
+        # Determine credentials
+        access_key = settings.STORAGE_ACCESS_KEY or settings.AWS_ACCESS_KEY_ID
+        secret_key = settings.STORAGE_SECRET_KEY or settings.AWS_SECRET_ACCESS_KEY
+        
+        if self.provider == "LOCAL":
+            logging.info("[StorageService] Initialized in LOCAL mode.")
+            return
+
+        try:
+            # Most providers (OCI, GCP, MinIO, NAS) are S3-compatible
+            client_kwargs = {
+                'service_name': 's3',
+                'aws_access_key_id': access_key,
+                'aws_secret_access_key': secret_key,
+                'region_name': settings.STORAGE_REGION or settings.AWS_REGION
+            }
+            
+            # Handle Custom Endpoints (OCI, NAS, GCP Interoperability)
+            endpoint = settings.STORAGE_ENDPOINT
+            
+            if self.provider == "OCI":
+                # Auto-fallback to standard OCI endpoint logic if not provided
+                # Example: https://{namespace}.compat.objectstorage.{region}.oraclecloud.com
+                if not endpoint:
+                    logging.warning("[StorageService] OCI selected but STORAGE_ENDPOINT is missing.")
+            
+            if endpoint:
+                client_kwargs['endpoint_url'] = endpoint
+                logging.info(f"[StorageService] Using custom endpoint: {endpoint}")
+
+            self.s3_client = boto3.client(**client_kwargs)
+            logging.info(f"[StorageService] Initialized {self.provider} storage (Bucket: {self.bucket})")
+            
+        except Exception as e:
+            logging.error(f"[StorageService] Failed to initialize {self.provider} storage: {e}")
+            self.provider = "LOCAL"
 
     def upload_file(self, file_path: str, object_name: Optional[str] = None) -> str:
         """
-        Uploads a file to S3 if configured, otherwise returns the local path.
-        Returns the object key (S3) or file path (Local).
+        Uploads a file to the configured provider. 
+        Returns the object key (Cloud) or absolute file path (Local).
         """
         if object_name is None:
             object_name = os.path.basename(file_path)
 
-        if self.use_s3 and self.s3_client:
+        if self.provider != "LOCAL" and self.s3_client:
             try:
-                self.s3_client.upload_file(file_path, settings.AWS_STORAGE_BUCKET_NAME, object_name)
-                logging.info(f"[StorageService] Uploaded {file_path} to s3://{settings.AWS_STORAGE_BUCKET_NAME}/{object_name}")
+                self.s3_client.upload_file(file_path, self.bucket, object_name)
+                logging.info(f"[StorageService] Uploaded {file_path} to {self.provider}://{self.bucket}/{object_name}")
                 return object_name
             except Exception as e:
-                logging.error(f"[StorageService] Upload failed: {e}")
+                logging.error(f"[StorageService] {self.provider} upload failed: {e}")
                 return file_path
         else:
-            # Local storage - file is already there, just return path
-            return file_path
+            # Local storage fallback
+            return os.path.abspath(file_path)
 
     def get_public_url(self, object_key_or_path: str, expiration: int = 3600) -> str:
         """
-        Generates a presigned URL (S3) or returns a local static URL path.
+        Generates a presigned URL (Cloud) or returns a local static URL path.
         """
-        if self.use_s3 and self.s3_client and not object_key_or_path.startswith("/"):
-             # Assume it's an S3 object key if it doesn't start with /
+        if self.provider != "LOCAL" and self.s3_client and not object_key_or_path.startswith("/"):
             try:
-                response = self.s3_client.generate_presigned_url('get_object',
-                                                    Params={'Bucket': settings.AWS_STORAGE_BUCKET_NAME,
-                                                            'Key': object_key_or_path},
-                                                    ExpiresIn=expiration)
+                # OCI and standard S3 use the same presigned URL logic
+                response = self.s3_client.generate_presigned_url(
+                    'get_object',
+                    Params={'Bucket': self.bucket, 'Key': object_key_or_path},
+                    ExpiresIn=expiration
+                )
                 return response
             except Exception as e:
-                logging.error(f"[StorageService] Failed to generate presigned URL: {e}")
+                logging.error(f"[StorageService] Failed to generate presigned URL for {self.provider}: {e}")
                 return object_key_or_path
         else:
-            # Local fallback: Assuming served via static mount (if configured) or just returning raw path for debug
-            # In a real local setup, we'd map this to a /static/ URL.
-            # For now, we return the path but might want to fix this for frontend access.
-            if os.path.exists(object_key_or_path):
-                 # Quick hack for localhost dashboard: if path is inside 'outputs', serve it?
-                 # ideally we need Nginx or FastAPI static mount.
-                 # Let's assume FastAPI mounts 'outputs' at /static/outputs (common pattern)
-                 filename = os.path.basename(object_key_or_path)
-                 return f"{settings.PRODUCTION_DOMAIN}/static/outputs/{filename}"
-            return object_key_or_path
+            # Local fallback logic
+            filename = os.path.basename(object_key_or_path)
+            return f"{settings.PRODUCTION_DOMAIN}/static/outputs/{filename}"
 
 base_storage_service = StorageService()

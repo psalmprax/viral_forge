@@ -46,7 +46,15 @@ class Settings(BaseSettings):
     def TIKTOK_REDIRECT_URI(self) -> str:
         return f"{self.PRODUCTION_DOMAIN}/publish/auth/tiktok/callback"
     
-    # AWS / Storage
+    # Multi-Cloud Storage Engine
+    STORAGE_PROVIDER: str = "LOCAL"  # Options: AWS, OCI, GCP, AZURE, CUSTOM, LOCAL
+    STORAGE_ENDPOINT: Optional[str] = None
+    STORAGE_BUCKET: str = ""
+    STORAGE_ACCESS_KEY: Optional[str] = None
+    STORAGE_SECRET_KEY: Optional[str] = None
+    STORAGE_REGION: str = "us-east-1"
+    
+    # Deprecated (Keeping for backward sync during migration)
     AWS_ACCESS_KEY_ID: str = ""
     AWS_SECRET_ACCESS_KEY: str = ""
     AWS_REGION: str = "us-east-1"
