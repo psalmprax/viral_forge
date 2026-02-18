@@ -100,21 +100,22 @@ pipeline {
                     """
 
                     // 3. Write .env file Locally
-                    sh """
-                        cat > ${DEPLOY_DIR}/.env <<EOF
+                    script {
+                        def envContent = """
 GROQ_API_KEY=${GROQ_API_KEY}
 TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
 POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
 REDIS_PASSWORD=${REDIS_PASSWORD}
 JWT_SECRET_KEY=${JWT_SECRET_KEY}
-STORAGE_PROVIDER=${STORAGE_PROVIDER}
-STORAGE_ENDPOINT=${STORAGE_ENDPOINT}
-STORAGE_BUCKET=${STORAGE_BUCKET}
-STORAGE_ACCESS_KEY=${STORAGE_ACCESS_KEY}
-STORAGE_SECRET_KEY=${STORAGE_SECRET_KEY}
-STORAGE_REGION=${STORAGE_REGION}
-EOF
-                    """
+STORAGE_PROVIDER=${env.STORAGE_PROVIDER ?: 'LOCAL'}
+STORAGE_ENDPOINT=${env.STORAGE_ENDPOINT ?: ''}
+STORAGE_BUCKET=${env.STORAGE_BUCKET ?: ''}
+STORAGE_ACCESS_KEY=${env.STORAGE_ACCESS_KEY ?: ''}
+STORAGE_SECRET_KEY=${env.STORAGE_SECRET_KEY ?: ''}
+STORAGE_REGION=${env.STORAGE_REGION ?: ''}
+"""
+                        sh "echo '${envContent}' > ${DEPLOY_DIR}/.env"
+                    }
 
                     // 4. Build and Launch
                     script {
