@@ -6,6 +6,7 @@ from services.optimization.service import base_optimization_service
 import asyncio
 import os
 import logging
+from api.config import settings
 
 # Bridge to use async code in synchronous Celery worker
 def run_async(coro):
@@ -120,7 +121,6 @@ def download_and_process_task(self, source_url: str, niche: str, platform: str):
         update_job(status="Completed", progress=100, output_path=public_url)
         
         # 5. Cleanup local artifacts (ONLY if cloud storage is active)
-        from api.config import settings
         if settings.STORAGE_PROVIDER != "LOCAL":
             cleanup_local_files(video_path, processed_path)
         else:

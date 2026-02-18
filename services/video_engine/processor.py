@@ -2,7 +2,7 @@ from moviepy import VideoFileClip, TextClip, CompositeVideoClip, concatenate_vid
 import os
 import random
 import logging
-from typing import List, Optional
+from typing import List, Optional, Dict
 from .transcription import transcription_service
 from api.config import settings
 
