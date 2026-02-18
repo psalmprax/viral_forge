@@ -80,12 +80,12 @@ Add each one below:
   ```
 - **ID**: `OCI_SSH_KEY`
 
-### 3. Docker Hub Credentials
+### 3. Docker Hub Credentials (Optional)
 - **Kind**: Username with password
 - **Username**: your Docker Hub username
 - **Password**: Docker Hub password or access token
-  - Get token: hub.docker.com → Account Settings → Security → New Access Token
 - **ID**: `DOCKER_HUB_CREDENTIALS`
+> **Note**: This is only used to pull base images (like `python:3.10-slim`) to avoid rate limits. We **do not** push your ViralForge images to the registry anymore; they are built locally on the server.
 
 ### 4. Groq API Key
 - **Kind**: Secret text

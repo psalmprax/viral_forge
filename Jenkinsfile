@@ -38,8 +38,8 @@
 
 def OCI_HOST        = "130.61.26.105"           // Your OCI instance public IP
 def OCI_USER        = "ubuntu"                   // SSH user on OCI
-def GITHUB_REPO     = "YOUR_USERNAME/viral_forge" // e.g. psalmprax/viral_forge
-def DOCKER_IMAGE    = "YOUR_DOCKERHUB_USER/viralforge" // e.g. psalmprax/viralforge
+def GITHUB_REPO     = "psalmprax/viral_forge" // e.g. psalmprax/viral_forge
+def DOCKER_IMAGE    = "psalmprax/viralforge" // e.g. psalmprax/viralforge
 def DEPLOY_DIR      = "/home/ubuntu/viralforge"  // Deployment path on OCI server
 
 pipeline {
@@ -100,37 +100,27 @@ pipeline {
             }
         }
 
-        stage('Build Docker Images') {
+        stage('Deploy & Build Locally') {
             steps {
-                withCredentials([usernamePassword(
-                    credentialsId: 'DOCKER_HUB_CREDENTIALS',
-                    usernameVariable: 'DOCKER_USER',
-                    passwordVariable: 'DOCKER_PASS'
-                )]) {
-                    sh '''
-                        echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
-                        docker-compose build --no-cache
-                        docker tag ${PROJECT_NAME}_api ${DOCKER_IMAGE}:${BUILD_NUMBER}
-                        docker tag ${PROJECT_NAME}_api ${DOCKER_IMAGE}:latest
-                        docker push ${DOCKER_IMAGE}:${BUILD_NUMBER}
-                        docker push ${DOCKER_IMAGE}:latest
-                    '''
-                }
-            }
-        }
-
-        stage('Deploy to OCI') {
-            steps {
-                withCredentials([sshUserPrivateKey(
-                    credentialsId: 'OCI_SSH_KEY',
-                    keyFileVariable: 'SSH_KEY_FILE'
-                )]) {
+                withCredentials([
+                    sshUserPrivateKey(credentialsId: 'OCI_SSH_KEY', keyFileVariable: 'SSH_KEY_FILE'),
+                    usernamePassword(credentialsId: 'DOCKER_HUB_CREDENTIALS', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS') // Optional if base images are public
+                ]) {
                     sh """
-                        # Copy latest docker-compose to server
-                        scp -i \$SSH_KEY_FILE -o StrictHostKeyChecking=no \\
-                            ${DOCKER_COMPOSE_FILE} ${OCI_USER}@${OCI_HOST}:${DEPLOY_DIR}/
+                        # Create deployment directory if not exists
+                        ssh -i \$SSH_KEY_FILE -o StrictHostKeyChecking=no ${OCI_USER}@${OCI_HOST} "mkdir -p ${DEPLOY_DIR}"
 
-                        # Write .env on server (from Jenkins secrets — never stored in git)
+                        # Sync source code to server (excluding git history and local artifacts)
+                        rsync -avz --delete \\
+                            -e "ssh -i \$SSH_KEY_FILE -o StrictHostKeyChecking=no" \\
+                            --exclude '.git' \\
+                            --exclude 'venv' \\
+                            --exclude '__pycache__' \\
+                            --exclude '.env' \\
+                            --exclude 'terraform' \\
+                            . ${OCI_USER}@${OCI_HOST}:${DEPLOY_DIR}
+
+                        # Write .env on server (from Jenkins secrets)
                         ssh -i \$SSH_KEY_FILE -o StrictHostKeyChecking=no ${OCI_USER}@${OCI_HOST} \\
                         "cat > ${DEPLOY_DIR}/.env << 'ENVEOF'
 GROQ_API_KEY=${GROQ_API_KEY}
@@ -140,11 +130,19 @@ REDIS_PASSWORD=${REDIS_PASSWORD}
 JWT_SECRET_KEY=${JWT_SECRET_KEY}
 ENVEOF"
 
-                        # Pull latest images and restart services
+                        # Build and Deploy on Server
                         ssh -i \$SSH_KEY_FILE -o StrictHostKeyChecking=no ${OCI_USER}@${OCI_HOST} \\
                         "cd ${DEPLOY_DIR} && \\
-                         docker-compose pull && \\
+                         # Log in to Docker Hub ONLY if needed for base images (e.g. rate limits)
+                         echo '$DOCKER_PASS' | docker login -u '$DOCKER_USER' --password-stdin || true && \\
+                         
+                         # Build images locally using the synced code
+                         docker-compose build --no-cache && \\
+                         
+                         # Start services
                          docker-compose up -d --remove-orphans && \\
+                         
+                         # Clean up unused images/layers to save space
                          docker system prune -f"
                     """
                 }
