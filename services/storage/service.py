@@ -19,13 +19,22 @@ class StorageService:
             return
 
         try:
+            from botocore import UNSIGNED
+            from botocore.config import Config
+            
             # Most providers (OCI, GCP, MinIO, NAS) are S3-compatible
             client_kwargs = {
                 'service_name': 's3',
-                'aws_access_key_id': access_key,
-                'aws_secret_access_key': secret_key,
                 'region_name': settings.STORAGE_REGION or settings.AWS_REGION
             }
+            
+            # Use credentials if provided, otherwise prepare for UNSIGNED access
+            if access_key and secret_key:
+                client_kwargs['aws_access_key_id'] = access_key
+                client_kwargs['aws_secret_access_key'] = secret_key
+            else:
+                logging.warning(f"[StorageService] No access keys provided for {self.provider}. Attempting unsigned access.")
+                client_kwargs['config'] = Config(signature_version=UNSIGNED)
             
             # Handle Custom Endpoints (OCI, NAS, GCP Interoperability)
             endpoint = settings.STORAGE_ENDPOINT
