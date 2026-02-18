@@ -21,7 +21,7 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
-import { API_BASE } from "@/lib/config";
+import { API_BASE, WS_BASE } from "@/lib/config";
 import dynamic from "next/dynamic";
 import * as d3 from "d3";
 import { useWebSocket } from "@/hooks/useWebSocket";
@@ -163,7 +163,7 @@ export default function DiscoveryPage() {
         { lat: 6.5244, lng: 3.3792, intensity: 0.7, label: "LOS Gateway" }
     ]);
 
-    const { data: telemetryData } = useWebSocket("ws://localhost:8000/ws/telemetry");
+    const { data: telemetryData } = useWebSocket(`${WS_BASE}/ws/telemetry`);
 
     useEffect(() => {
         if (telemetryData) {

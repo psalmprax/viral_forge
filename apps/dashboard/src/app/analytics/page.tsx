@@ -23,7 +23,7 @@ import { Skeleton } from "@/components/ui/Skeleton";
 import { ErrorNode } from "@/components/ui/ErrorNode";
 import { useWebSocket } from "@/hooks/useWebSocket";
 import dynamic from "next/dynamic";
-import { API_BASE } from "@/lib/config";
+import { API_BASE, WS_BASE } from "@/lib/config";
 
 const GlobalPulseGlobe = dynamic(() => import("@/components/ui/GlobalPulseGlobe"), { ssr: false });
 
@@ -102,7 +102,7 @@ export default function AnalyticsPage() {
     const [globalFilter, setGlobalFilter] = useState("");
 
     // Real-time Telemetry Stream
-    const { data: telemetry } = useWebSocket<any>("ws://localhost:8000/ws/telemetry");
+    const { data: telemetry } = useWebSocket<any>(`${WS_BASE}/ws/telemetry`);
     const pulseIntensity = telemetry?.metrics?.signal_strength || 0;
 
     const columnHelper = createColumnHelper<SocialPost>();
