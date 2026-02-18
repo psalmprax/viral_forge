@@ -104,8 +104,9 @@ Add each one below:
 
 ### 7. Redis Password
 - **Kind**: Secret text
-- **Secret**: your redis password (check your `.env` file)
+- **Secret**: your redis password (must match what you expect, or generate a new one)
 - **ID**: `REDIS_PASSWORD`
+> **Important**: The application now enforces this password. Ensure this credential is set in Jenkins.
 
 ### 8. JWT Secret Key
 - **Kind**: Secret text
