@@ -67,18 +67,23 @@ async def seed_default_user():
     finally:
         db.close()
 
+
 # Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "http://130.61.26.105:3000",
+        "http://130.61.26.105",
         "http://localhost:3000",
+        "http://localhost",
         "http://127.0.0.1:3000",
     ],
+    allow_origin_regex="http://130\\.61\\.26\\.105(:\\d+)?",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
 
 @app.middleware("http")
 async def log_requests(request: Request, call_next):
@@ -87,15 +92,10 @@ async def log_requests(request: Request, call_next):
         print(f"[DEBUG AUTH] 401 at {request.url.path} | Headers: {dict(request.headers)}")
     return response
 
-from fastapi import Request
 
-from fastapi.staticfiles import StaticFiles
-
-# Ensure outputs directory exists
-os.makedirs("outputs", exist_ok=True)
-app.mount("/static", StaticFiles(directory="outputs"), name="static")
-
+# Router Includes
 app.include_router(auth.router)
+
 app.include_router(discovery.router)
 app.include_router(video.router)
 app.include_router(publish.router)
