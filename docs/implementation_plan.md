@@ -50,6 +50,8 @@ ViralForge is a fully autonomous viral content engine for solo creators. It uses
 - **Roles**: ADMIN, CREATOR, VIEWER
 - **Data Isolation**: All jobs/history linked to `user_id`
 - **Admin**: Hardcoded root access for `psalmprax`
+- **Resilience**: Optimized middleware to prevent blocking imports; Nginx rate limits relaxed to 50r/s for seamless dashboard polling.
+- **Healthchecks**: Custom Celery-aware health probes implemented for autonomous self-healing.
 
 ---
 
