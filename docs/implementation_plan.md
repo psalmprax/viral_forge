@@ -51,6 +51,8 @@ ViralForge is a fully autonomous viral content engine for solo creators. It uses
 - **Data Isolation**: All jobs/history linked to `user_id`
 - **Admin**: Hardcoded root access for `psalmprax`
 - **Resilience**: Optimized middleware to prevent blocking imports; Nginx rate limits relaxed to 50r/s for seamless dashboard polling.
+- **WebSocket Proxy**: Refactored Nginx to use trailing-slash stripping for robust protocol switching (101 Switching Protocols).
+- **CSP Policy**: Dynamic whitelist for `cdn.jsdelivr.net` to support global intelligence mapping.
 - **Healthchecks**: Custom Celery-aware health probes implemented for autonomous self-healing.
 
 ---
