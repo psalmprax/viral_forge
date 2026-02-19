@@ -1,6 +1,7 @@
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from api.routes import discovery, video, publish, analytics, auth, settings as settings_router, ws, no_face, monetization, nexus, ab_testing, security
+from services.security.service import base_security_sentinel
 from api.config import settings
 import os
 from slowapi import Limiter, _rate_limit_exceeded_handler
@@ -75,7 +76,6 @@ async def log_requests(request: Request, call_next):
     if request.scope.get("type") == "websocket" or request.url.path.startswith("/ws/"):
         return await call_next(request)
         
-    from services.security.service import base_security_sentinel
     response = await call_next(request)
     
     # Sentinel Monitoring
