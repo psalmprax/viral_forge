@@ -20,6 +20,9 @@ Search for discovered content candidates based on a query.
 ### /vf-health
 Check the operational status of the ViralForge API and scanners.
 
+### /storage
+Check the local video storage usage and cloud migration status.
+
 ## Actions
 
 ### Scan
@@ -42,6 +45,13 @@ Check the operational status of the ViralForge API and scanners.
 ```json
 {
   "action": "health"
+}
+```
+
+### Storage
+```json
+{
+  "action": "storage"
 }
 ```
 

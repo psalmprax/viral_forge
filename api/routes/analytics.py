@@ -111,6 +111,27 @@ async def get_stats_summary(current_user: UserDB = Depends(get_current_user)):
         }
     finally:
         db.close()
+
+@router.get("/stats/storage")
+async def get_storage_stats(current_user: UserDB = Depends(get_current_user)):
+    """Get storage usage statistics for the outputs directory."""
+    from services.storage.manager import storage_manager
+    from api.config import settings
+    
+    try:
+        current_size = storage_manager.get_output_dir_size()
+        threshold_bytes = storage_manager.threshold_bytes
+        
+        return {
+            "current_size_gb": round(current_size / (1024**3), 2),
+            "threshold_gb": storage_manager.threshold_gb,
+            "usage_percent": round((current_size / threshold_bytes) * 100, 1) if threshold_bytes > 0 else 0,
+            "status": "Healthy" if current_size < threshold_bytes * 0.9 else "Warning" if current_size < threshold_bytes else "Critical",
+            "provider": settings.STORAGE_PROVIDER
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 @router.get("/ab/results/{content_id}")
 async def get_ab_results(content_id: str, current_user: UserDB = Depends(get_current_user)):
     """

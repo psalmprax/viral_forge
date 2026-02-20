@@ -22,4 +22,33 @@ class SystemSkill:
         except Exception as e:
             return f"❌ **Critical Error**: Unable to contact API. {str(e)}"
 
+    def get_storage_status(self) -> str:
+        """
+        Retrieves video storage usage metrics.
+        """
+        try:
+            response = requests.get(f"{self.api_url}/analytics/stats/storage", timeout=5)
+            if response.status_code == 200:
+                data = response.json()
+                size = data.get("current_size_gb", 0)
+                threshold = data.get("threshold_gb", 140)
+                usage = data.get("usage_percent", 0)
+                status = data.get("status", "Unknown")
+                provider = data.get("provider", "LOCAL")
+                
+                status_emoji = "✅" if status == "Healthy" else "⚠️" if status == "Warning" else "🚨"
+                
+                msg = f"{status_emoji} **Storage Status**: {status}\n\n"
+                msg += f"📦 **Total Usage**: {size} GB / {threshold} GB ({usage}%)\n"
+                msg += f"☁️ **Provider**: {provider}\n"
+                
+                if usage > 90:
+                    msg += "\n🛑 **ALERT**: Local storage is nearly full. Archival migration will trigger soon."
+                
+                return msg
+            else:
+                return f"⚠️ **Storage Alert**: API returned status {response.status_code}."
+        except Exception as e:
+            return f"❌ **Error fetching storage stats**: {str(e)}"
+
 system_skill = SystemSkill()

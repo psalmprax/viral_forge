@@ -40,6 +40,13 @@ interface DashboardStats {
   videos_processed: number;
   total_reach: string;
   success_rate: string;
+  storage?: {
+    current_size_gb: number;
+    threshold_gb: number;
+    usage_percent: number;
+    status: string;
+    provider: string;
+  };
 }
 
 export default function Home() {
@@ -60,6 +67,15 @@ export default function Home() {
         });
         if (response.ok) {
           const data = await response.json();
+
+          // Fetch storage stats
+          const storageResponse = await fetch(`${API_BASE}/analytics/stats/storage`, {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          if (storageResponse.ok) {
+            data.storage = await storageResponse.json();
+          }
+
           setStats(data);
         }
       } catch (error) {
@@ -145,6 +161,44 @@ export default function Home() {
             href="/publishing"
           />
         </motion.div>
+
+        {/* Storage Monitoring Section */}
+        {stats.storage && (
+          <motion.div variants={itemVariants} className="glass-card p-8 rounded-[2rem] relative overflow-hidden group border border-white/5 hover:border-primary/30 transition-all">
+            <div className="absolute inset-0 scanline opacity-5 pointer-events-none" />
+            <div className="flex flex-col md:flex-row items-center justify-between gap-8">
+              <div className="space-y-4 text-center md:text-left">
+                <div className="flex items-center gap-3 justify-center md:justify-start">
+                  <div className={`h-2 w-2 rounded-full animate-pulse ${stats.storage.status === 'Healthy' ? 'bg-emerald-500' : stats.storage.status === 'Warning' ? 'bg-amber-500' : 'bg-red-500'}`} />
+                  <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Storage Lifecycle Manager</span>
+                </div>
+                <h3 className="text-3xl font-black text-white italic uppercase tracking-tighter">Autonomous <span className="text-primary">Archival</span> Status</h3>
+                <p className="text-zinc-500 font-medium max-w-md">
+                  Monitoring local video assets. Automatic migration to <span className="text-white font-bold">{stats.storage.provider}</span> triggers at {stats.storage.threshold_gb}GB.
+                </p>
+              </div>
+
+              <div className="flex-1 w-full max-w-md space-y-4">
+                <div className="flex justify-between items-end">
+                  <span className="text-2xl font-black text-white">{stats.storage.current_size_gb} <span className="text-sm text-zinc-500 uppercase font-bold tracking-widest">GB Used</span></span>
+                  <span className="text-sm font-black text-primary">{stats.storage.usage_percent}%</span>
+                </div>
+                <div className="h-4 w-full bg-white/5 rounded-full overflow-hidden border border-white/5 p-1">
+                  <motion.div
+                    initial={{ width: 0 }}
+                    animate={{ width: `${stats.storage.usage_percent}%` }}
+                    transition={{ duration: 1.5, ease: "easeOut" }}
+                    className={`h-full rounded-full ${stats.storage.status === 'Healthy' ? 'bg-emerald-500' : stats.storage.status === 'Warning' ? 'bg-amber-500' : 'bg-red-500'}`}
+                  />
+                </div>
+                <div className="flex justify-between text-[10px] font-black uppercase tracking-widest text-zinc-600">
+                  <span>0 GB</span>
+                  <span>Threshold: {stats.storage.threshold_gb} GB</span>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        )}
 
         {/* Recent Activity Section */}
         <motion.div variants={itemVariants} className="glass-card flex flex-col items-center justify-center text-center gap-6 relative overflow-hidden group">

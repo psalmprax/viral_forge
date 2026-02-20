@@ -29,6 +29,7 @@ class OpenClawAgent:
         - PUBLISH: Publish a completed job. Params: {"job_id": "string", "platform": "YouTube Shorts|TikTok", "niche": "string"}
         - NICHE: Manage niches. Params: {"action": "add|trends", "niche": "string"}
         - SECURITY: Emergency lockdown. Params: {"action": "panic|status"}
+        - STORAGE: Check video storage usage and cloud status. No params needed.
         
         When a user asks a question, determine if you need to use a tool.
         If yes, output a JSON object with:
@@ -143,5 +144,8 @@ class OpenClawAgent:
                 # I'll stick to panic for now or I can update security.py.
                 # Given the user request was "/panic", I'll focus on that.
                 return security_skill.panic_lockdown()
+
+        elif tool == "STORAGE":
+            return system_skill.get_storage_status()
 
         return f"❓ Unknown tool: {tool}"

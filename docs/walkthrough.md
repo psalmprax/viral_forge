@@ -43,6 +43,11 @@ ViralForge is a **fully autonomous, cloud-deployed content intelligence platform
 - **Safe Move Logic**: A multi-stage verification process (Upload -> Verify -> DB Sync -> Delete Local) ensures no data loss during archival.
 - **Retention Policy**: Enforced a 90-day cloud retention policy for video assets to minimize storage costs while maintaining platform presence.
 
+### 14. Storage Monitoring UI & OpenClaw Tool
+- **Dashboard Telemetry**: Added a real-time "Storage Lifecycle Manager" health bar to the main dashboard, displaying GB usage and threshold percentage.
+- **OpenClaw Integration**: Developed the `/storage` command for the Telegram bot. The agent now reports current disk usage, cloud provider status, and archival health via natural language.
+- **Alert System**: The bot and UI now trigger "Warning" and "Critical" states when local storage exceeds 90% and 100% of the threshold respectively.
+
 ---
 ...
 (rest of the architecture and structured content follows)
