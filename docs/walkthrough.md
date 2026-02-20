@@ -228,5 +228,5 @@ open http://localhost:3000
 | Authentication (JWT) | ✅ Live |
 | OCI ARM Infrastructure | ✅ Provisioned (200GB Expanded) |
 | OpenClaw Telegram Bot | ✅ Live (@Psalmpraxbot) |
-| CI/CD Pipeline | ✅ Live |
+| CI/CD Pipeline | ✅ Live (Jenkins @ Port 8080) |
 | Production Go-Live | ✅ Mission Complete |
