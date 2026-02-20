@@ -60,9 +60,7 @@ resource "oci_core_instance" "this" {
   preserve_boot_volume = false
 
   lifecycle {
-    ignore_changes = [
-      source_details[0].boot_volume_size_in_gbs
-    ]
+    ignore_changes = []
   }
 }
 

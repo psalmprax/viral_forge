@@ -17,7 +17,7 @@ variable "image_id" {
 
 variable "boot_volume_size_in_gbs" {
   description = "Size of the boot volume in GB (OCI Free Tier max is 200GB total)"
-  default     = 100
+  default     = 200
 }
 
 variable "allowed_ports" {

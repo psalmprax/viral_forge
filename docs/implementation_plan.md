@@ -151,6 +151,24 @@ pipeline {
 
 ---
 
+---
+
+## Phase 93: High-Fidelity Voice Synthesis (Fish Speech)
+
+### Problem
+ElevenLabs cost scaling is unsustainable for autonomous content generation. We need a high-quality, cost-effective alternative.
+
+### Solution
+Integrate **Fish Speech** (Open Source weights) as a containerized service.
+- **Deployment**: Dockerized with ARM64 optimizations.
+- **Storage**: Utilizes the expanded 200GB boot volume for model weights and audio cache.
+- **Interface**: FastAPI wrapper for integration with `NexusEngine`.
+- **Automation**: 
+  - Added `download_models.py` to auto-fetch weights from HuggingFace.
+  - Integration with `entrypoint.sh` to ensure weights exist before service start.
+
+---
+
 ## Verification Plan
 
 ### Automated Tests

@@ -13,6 +13,8 @@ export function useWebSocket<T>(url: string) {
     const connect = useCallback(() => {
         if (!isMounted.current) return;
 
+        console.log(`[WS] Attempting to connect to ${url}`);
+
         if (reconnectAttempts.current >= maxReconnectAttempts) {
             console.warn(`[WS] Max reconnect attempts (${maxReconnectAttempts}) reached for ${url}`);
             setStatus('closed');
@@ -95,10 +97,11 @@ export function useWebSocket<T>(url: string) {
     useEffect(() => {
         isMounted.current = true;
         
-        // Small delay to ensure component is fully mounted
+        // Longer delay to ensure component is fully mounted and network is ready
         const initTimeout = setTimeout(() => {
+            console.log(`[WS] Initial connection attempt to ${url}`);
             connect();
-        }, 100);
+        }, 500);
 
         return () => {
             isMounted.current = false;

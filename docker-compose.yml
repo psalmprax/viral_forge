@@ -161,5 +161,17 @@ services:
     depends_on:
       - api
 
+  voiceover:
+    build:
+      context: ./services/voiceover
+    ports:
+      - "8082:8080"
+    environment:
+      - DEVICE=cpu
+    volumes:
+      - ./services/voiceover:/app
+      - voiceover_cache:/app/cache
+
 volumes:
   postgres_data:
+  voiceover_cache:
