@@ -33,11 +33,15 @@ ViralForge is a **fully autonomous, cloud-deployed content intelligence platform
 - **Self-Healing Infra**: Corrected Celery healthchecks to ensure accurate container orchestration status.
 - **E2E Scaling**: Verified the Go-based discovery bridge for high-concurrency social scanning.
 
-### 10. WebSocket & Navigation Elasticity (Phase 92)
-- **Mount-Guard Logic**: Implemented `isMounted` refs in the React `useWebSocket` hook to prevent "ghost" reconnection loops during rapid page navigation.
-- **Architectural Routing**: Standardized Nginx WebSocket proxying with explicit `Connection` upgrade mapping and `^~` prefix modifiers to ensure protocol switching (101) is prioritized.
-- **Environment Agnostic**: Dynamized API/WS base URLs in the frontend to resolve via `window.location`, eliminating IP-matching handshake failures.
-- **Elastic Timeouts**: Extended Nginx proxy read/send timeouts to 300s to support high-latency neural discovery and deep-analysis operations.
+### 11. High-Fidelity Voice Synthesis (Phase 93)
+- **Fish Speech Integration**: Deployed a local neural synthesis engine on OCI ARM, eliminating ElevenLabs cost scaling issues.
+- **Bootstrapping**: Implemented automated model weight fetching from HuggingFace on service start.
+- **Hybrid Support**: The dashboard now allows real-time switching between Cloud (ElevenLabs) and Local (Fish Speech) voice engines.
+
+### 12. Monetization Strategy Selection (Phase 94)
+- **Monetization Modes**: Introduced "Selective" and "All Content" modes to the autonomous parameters.
+- **Selective Mode**: Only monetizes content with a Viral Score > 85, protecting account reputation from being "too salesy".
+- **Dashboard UI**: Added a premium-styled mode toggle with exposure integrity monitoring.
 
 ---
 ...

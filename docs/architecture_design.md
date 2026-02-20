@@ -38,7 +38,7 @@
                     │   OCI ARM Server   │
                     │  (Always-Free)     │
                     │  4 OCPU / 24GB RAM │
-                    │  100GB Storage     │
+                    │  200GB Storage     │
                     └────────────────────┘
                               │
               ┌───────────────┼───────────────┐
@@ -69,6 +69,7 @@
 | `celery` | — | Celery 5 | Background task workers |
 | `celery-beat` | — | Celery Beat | Scheduled task scheduler |
 | `discovery-go` | 8080 | Go 1.21 | High-speed trend scanner |
+| `voiceover` | 8080 | FastAPI (Python) | Local neural voice synthesis (Fish Speech) |
 
 ### API Layer (FastAPI)
 
@@ -196,7 +197,7 @@ OCI Frankfurt Region
 ├── Compute Instance (VM.Standard.A1.Flex)
 │   ├── 4 OCPUs (ARM Ampere)
 │   ├── 24GB RAM
-│   ├── Boot Volume: 100GB
+│   ├── Boot Volume: 200GB
 │   └── Cloud-init: Docker + Git + Docker Compose
 └── Object Storage
     └── Private Bucket (video assets)

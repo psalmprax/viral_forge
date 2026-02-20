@@ -167,6 +167,27 @@
 
 ## ⏳ Maintenance & Future Roadmap
 
-- [ ] **Phase 93: DNS & HTTPS final binding**
+- [x] **Phase 93: High-Fidelity Voice Synthesis (Fish Speech)**
+    - [x] Deploy Fish Speech containerized service on OCI ARM
+    - [x] Implement automated model weight bootstrapping (HuggingFace)
+    - [x] Refactor `VoiceoverService` for neural engine selection (Fish vs ElevenLabs)
+    - [x] Expand OCI boot volume to 200GB for weight storage
+    - [x] Verification: Sub-second local synthesis confirmed on OCI.
+
+- [x] **Phase 94: Advanced Monetization Logic (Strategy Hardening)**
+    - [x] Implement "Selective" vs "Total" monetization modes
+    - [x] Integrate high-potential content filtering (Viral Score threshold)
+    - [x] Overhaul Settings UI with Exposure Integrity controls
+    - [x] Verification: CTA injection respects mode/score logic.
+
+---
+
+## ⏳ Maintenance & Future Roadmap
+
+- [ ] **Phase 95: DNS & HTTPS final binding**
     - [ ] Certbot SSL integration for custom domain
     - [ ] Global CDN distribution for video assets
+
+- [ ] **Phase 96: Mobile App (React Native)**
+    - [ ] Hybrid app for iOS/Android
+    - [ ] Push notifications for viral alerts

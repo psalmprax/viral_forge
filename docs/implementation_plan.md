@@ -38,6 +38,8 @@ ViralForge is a fully autonomous viral content engine for solo creators. It uses
 - **Commerce**: Shopify Admin API + POD product matching
 - **Strategy Pattern**: `AffiliateStrategy`, `LeadGenStrategy`, `DigitalProductStrategy`
 - **A/B Testing**: Hook and thumbnail performance tracking
+- **Exposure Integrity**: "Selective" mode for monk-like account reputation (Viral Score > 85).
+- **Control Mode**: High-fidelity toggle between "Selective" and "All Content" injection.
 
 ### Component 5: Analytics & Intelligence
 - **Real-time**: WebSocket telemetry streaming
@@ -196,6 +198,6 @@ cd terraform && terraform validate && terraform plan
 
 | Phase | Feature | Priority |
 |---|---|---|
-| 93 | DNS & HTTPS final binding | HIGH |
-| 94 | Mobile App (React Native) | MEDIUM |
-| 95 | Marketplace for Skills/Templates | LOW |
+| 95 | DNS & HTTPS final binding | HIGH |
+| 96 | Mobile App (React Native) | MEDIUM |
+| 97 | Marketplace for Skills/Templates | LOW |
