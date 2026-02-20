@@ -57,6 +57,19 @@ pipeline {
         POSTGRES_PASSWORD     = credentials('POSTGRES_PASSWORD')
         REDIS_PASSWORD        = credentials('REDIS_PASSWORD')
         JWT_SECRET_KEY        = credentials('JWT_SECRET_KEY')
+        TELEGRAM_ADMIN_ID     = credentials('TELEGRAM_ADMIN_ID')
+        
+        // OAuth & Social
+        GOOGLE_CLIENT_ID      = credentials('GOOGLE_CLIENT_ID')
+        GOOGLE_CLIENT_SECRET  = credentials('GOOGLE_CLIENT_SECRET')
+        TIKTOK_CLIENT_KEY      = credentials('TIKTOK_CLIENT_KEY')
+        TIKTOK_CLIENT_SECRET  = credentials('TIKTOK_CLIENT_SECRET')
+        YOUTUBE_API_KEY       = credentials('YOUTUBE_API_KEY')
+        TIKTOK_API_KEY        = credentials('TIKTOK_API_KEY')
+        
+        // OCI Storage
+        OCI_STORAGE_ACCESS_KEY = credentials('STORAGE_ACCESS_KEY')
+        OCI_STORAGE_SECRET_KEY = credentials('STORAGE_SECRET_KEY')
     }
 
     options {
@@ -104,15 +117,26 @@ pipeline {
                         def envContent = """
 GROQ_API_KEY=${GROQ_API_KEY}
 TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
+TELEGRAM_ADMIN_ID=${TELEGRAM_ADMIN_ID}
 POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
 REDIS_PASSWORD=${REDIS_PASSWORD}
 JWT_SECRET_KEY=${JWT_SECRET_KEY}
-STORAGE_PROVIDER=${env.STORAGE_PROVIDER ?: 'LOCAL'}
-STORAGE_ENDPOINT=${env.STORAGE_ENDPOINT ?: ''}
-STORAGE_BUCKET=${env.STORAGE_BUCKET ?: ''}
-STORAGE_ACCESS_KEY=${env.STORAGE_ACCESS_KEY ?: ''}
-STORAGE_SECRET_KEY=${env.STORAGE_SECRET_KEY ?: ''}
-STORAGE_REGION=${env.STORAGE_REGION ?: ''}
+# Networking
+PRODUCTION_DOMAIN=${PRODUCTION_DOMAIN}
+# OAuth
+GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
+TIKTOK_CLIENT_KEY=${TIKTOK_CLIENT_KEY}
+TIKTOK_CLIENT_SECRET=${TIKTOK_CLIENT_SECRET}
+YOUTUBE_API_KEY=${YOUTUBE_API_KEY}
+TIKTOK_API_KEY=${TIKTOK_API_KEY}
+# Storage
+STORAGE_PROVIDER=OCI
+STORAGE_ENDPOINT=https://frraceg1idjv.compat.objectstorage.eu-frankfurt-1.oraclecloud.com
+STORAGE_BUCKET=viral-forge-assets
+STORAGE_ACCESS_KEY=${OCI_STORAGE_ACCESS_KEY}
+STORAGE_SECRET_KEY=${OCI_STORAGE_SECRET_KEY}
+STORAGE_REGION=eu-frankfurt-1
 """
                         sh "umask 077 && echo '${envContent}' > ${DEPLOY_DIR}/.env"
                     }
