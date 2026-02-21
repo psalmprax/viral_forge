@@ -59,7 +59,13 @@ async def get_settings(db: Session = Depends(get_db), _admin = Depends(admin_req
         "tiktok_client_key": app_settings.TIKTOK_CLIENT_KEY,
         "tiktok_client_secret": app_settings.TIKTOK_CLIENT_SECRET,
         "active_monetization_strategy": "commerce",
-        "monetization_mode": "selective"
+        "monetization_mode": "selective",
+        "membership_platform_url": "",
+        "course_platform_url": "",
+        "sponsorship_contact": "sponsors@ettametta.ai",
+        "brand_partners": "",
+        "crypto_wallets": "",
+        "donation_link": ""
     }
     
     # Merge: DB takes precedence
@@ -83,6 +89,62 @@ async def update_setting(request: SettingUpdateRequest, db: Session = Depends(ge
     db.commit()
     db.refresh(setting)
     return {"status": "success", "key": setting.key}
+
+@router.get("/monetization/strategies")
+async def get_monetization_strategies():
+    """Returns all available monetization strategies"""
+    return {
+        "strategies": [
+            {
+                "id": "commerce",
+                "name": "E-Commerce",
+                "description": "Sell physical/digital products via Shopify",
+                "required_settings": ["shopify_shop_url", "shopify_access_token"]
+            },
+            {
+                "id": "affiliate",
+                "name": "Affiliate Marketing",
+                "description": "Earn commissions from product recommendations",
+                "required_settings": []
+            },
+            {
+                "id": "lead_gen",
+                "name": "Lead Generation",
+                "description": "Capture leads with free resources",
+                "required_settings": []
+            },
+            {
+                "id": "digital_product",
+                "name": "Digital Products",
+                "description": "Sell ebooks, templates, and digital downloads",
+                "required_settings": []
+            },
+            {
+                "id": "membership",
+                "name": "Membership/Patreon",
+                "description": "Recurring revenue through supporter tiers",
+                "required_settings": ["membership_platform_url"]
+            },
+            {
+                "id": "course",
+                "name": "Online Courses",
+                "description": "Sell online courses and tutorials",
+                "required_settings": ["course_platform_url"]
+            },
+            {
+                "id": "sponsorship",
+                "name": "Sponsorships",
+                "description": "Brand deals and sponsored content",
+                "required_settings": ["brand_partners"]
+            },
+            {
+                "id": "crypto",
+                "name": "Crypto/Donations",
+                "description": "Accept crypto tips or donations",
+                "required_settings": ["crypto_wallets", "donation_link"]
+            }
+        ]
+    }
 
 @router.post("/bulk")
 async def bulk_update_settings(settings_list: List[SettingUpdateRequest], db: Session = Depends(get_db), _admin = Depends(admin_required)):

@@ -42,6 +42,12 @@ export default function SettingsPage() {
         aws_storage_bucket_name: "",
         active_monetization_strategy: "commerce",
         monetization_mode: "selective",
+        membership_platform_url: "",
+        course_platform_url: "",
+        sponsorship_contact: "",
+        brand_partners: "",
+        crypto_wallets: "",
+        donation_link: "",
         storage_provider: "OCI",
         storage_access_key: "",
         storage_secret_key: "",
@@ -579,7 +585,7 @@ export default function SettingsPage() {
                                                     <span className="text-[10px] text-zinc-500 uppercase font-black px-2 py-0.5 bg-zinc-800 rounded-full">Decoupled Scaling Mode</span>
                                                 </div>
                                                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-                                                    {["commerce", "affiliate", "lead_gen", "digital_product"].map((strategy) => (
+                                                    {["commerce", "affiliate", "lead_gen", "digital_product", "membership", "course", "sponsorship", "crypto"].map((strategy) => (
                                                         <button
                                                             key={strategy}
                                                             onClick={() => updateSetting("active_monetization_strategy", strategy)}
@@ -599,6 +605,10 @@ export default function SettingsPage() {
                                                     {settings.active_monetization_strategy === "affiliate" && "Prioritizes high-commission affiliate network links."}
                                                     {settings.active_monetization_strategy === "lead_gen" && "Builds lists via newsletter and lead magnet signups."}
                                                     {settings.active_monetization_strategy === "digital_product" && "Scales high-margin courses, SaaS, and digital downloads."}
+                                                    {settings.active_monetization_strategy === "membership" && "Recurring revenue through Patreon/supporter tiers."}
+                                                    {settings.active_monetization_strategy === "course" && "Sell online courses and educational content."}
+                                                    {settings.active_monetization_strategy === "sponsorship" && "Brand deals and sponsored content partnerships."}
+                                                    {settings.active_monetization_strategy === "crypto" && "Accept crypto tips and donations."}
                                                 </p>
                                             </div>
                                         </div>

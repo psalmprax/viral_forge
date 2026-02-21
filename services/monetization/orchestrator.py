@@ -6,6 +6,10 @@ from .strategies.commerce import CommerceStrategy
 from .strategies.affiliate import AffiliateStrategy
 from .strategies.lead_gen import LeadGenStrategy
 from .strategies.digital_product import DigitalProductStrategy
+from .strategies.membership import MembershipStrategy
+from .strategies.course import CourseStrategy
+from .strategies.sponsorship import SponsorshipStrategy
+from .strategies.crypto import CryptoStrategy
 
 class MonetizationOrchestrator:
     def __init__(self):
@@ -13,7 +17,11 @@ class MonetizationOrchestrator:
             "commerce": CommerceStrategy(),
             "affiliate": AffiliateStrategy(),
             "lead_gen": LeadGenStrategy(),
-            "digital_product": DigitalProductStrategy()
+            "digital_product": DigitalProductStrategy(),
+            "membership": MembershipStrategy(),
+            "course": CourseStrategy(),
+            "sponsorship": SponsorshipStrategy(),
+            "crypto": CryptoStrategy()
         }
         self.logger = logging.getLogger("MonetizationOrchestrator")
 
