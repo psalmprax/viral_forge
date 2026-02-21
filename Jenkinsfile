@@ -7,24 +7,17 @@
  *  ID                        Type                  Description
  *  ─────────────────────────────────────────────────────────────────────
  *  GITHUB_CREDENTIALS        Username/Password     GitHub username + Personal Access Token
- *                            (or SSH Key)          (Settings → Developer settings → PAT)
- *
  *  OCI_SSH_KEY               SSH Private Key       The .pem key used to SSH into your OCI instance
- *                                                  (the same key in ~/.oci/*.pem)
- *
  *  DOCKER_HUB_CREDENTIALS    Username/Password     Docker Hub username + password/access token
- *                                                  (hub.docker.com → Account Settings → Security)
- *
- *  GROQ_API_KEY              Secret text           Your Groq API key from console.groq.com
- *
- *  TELEGRAM_BOT_TOKEN        Secret text           Your Telegram bot token from @BotFather
- *
- *  POSTGRES_PASSWORD         Secret text           PostgreSQL password for production DB
- *
- *  REDIS_PASSWORD            Secret text           Redis password (if auth enabled)
- *
+ *  GROQ_API_KEY              Secret text           Your Groq API key
+ *  OPENAI_API_KEY            Secret text           Optional: OpenAI API key
+ *  ELEVENLABS_API_KEY        Secret text           Optional: ElevenLabs API key
+ *  PEXELS_API_KEY            Secret text           Your Pexels API key for stock footage
+ *  TELEGRAM_BOT_TOKEN        Secret text           Your Telegram bot token
+ *  TELEGRAM_ADMIN_ID         Secret text           Your Telegram User ID (numeric)
+ *  POSTGRES_PASSWORD         Secret text           PostgreSQL password
+ *  REDIS_PASSWORD            Secret text           Redis password
  *  JWT_SECRET_KEY            Secret text           Random secret for JWT signing
- *                                                  Generate with: openssl rand -hex 32
  *
  * HOW TO ADD A CREDENTIAL IN JENKINS:
  *  1. Go to: Jenkins → Manage Jenkins → Credentials → System → Global credentials
@@ -38,6 +31,12 @@
 
 pipeline {
     agent any
+    
+    parameters {
+        string(name: 'PRODUCTION_DOMAIN', defaultValue: 'http://130.61.26.105', description: 'Public URL of your ViralForge instance')
+        choice(name: 'VOICE_ENGINE', choices: ['fish_speech', 'elevenlabs'], description: 'Primary voice synthesis engine')
+        choice(name: 'MONETIZATION_MODE', choices: ['selective', 'all'], description: 'Monetization strategy')
+    }
 
     environment {
         PROJECT_NAME          = "viral_forge"
@@ -52,7 +51,11 @@ pipeline {
         PATH                  = "/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:${env.PATH}"
 
         // Injected from Jenkins credentials store
+        // Injected mapping
         GROQ_API_KEY          = credentials('GROQ_API_KEY')
+        OPENAI_API_KEY        = credentials('OPENAI_API_KEY')
+        ELEVENLABS_API_KEY    = credentials('ELEVENLABS_API_KEY')
+        PEXELS_API_KEY        = credentials('PEXELS_API_KEY')
         TELEGRAM_BOT_TOKEN    = credentials('TELEGRAM_BOT_TOKEN')
         POSTGRES_PASSWORD     = credentials('POSTGRES_PASSWORD')
         REDIS_PASSWORD        = credentials('REDIS_PASSWORD')
@@ -60,12 +63,12 @@ pipeline {
         TELEGRAM_ADMIN_ID     = credentials('TELEGRAM_ADMIN_ID')
         
         // OAuth & Social
-        GOOGLE_CLIENT_ID      = credentials('GOOGLE_CLIENT_ID')
-        GOOGLE_CLIENT_SECRET  = credentials('GOOGLE_CLIENT_SECRET')
+        GOOGLE_CLIENT_ID       = credentials('GOOGLE_CLIENT_ID')
+        GOOGLE_CLIENT_SECRET   = credentials('GOOGLE_CLIENT_SECRET')
         TIKTOK_CLIENT_KEY      = credentials('TIKTOK_CLIENT_KEY')
-        TIKTOK_CLIENT_SECRET  = credentials('TIKTOK_CLIENT_SECRET')
-        YOUTUBE_API_KEY       = credentials('YOUTUBE_API_KEY')
-        TIKTOK_API_KEY        = credentials('TIKTOK_API_KEY')
+        TIKTOK_CLIENT_SECRET   = credentials('TIKTOK_CLIENT_SECRET')
+        YOUTUBE_API_KEY        = credentials('YOUTUBE_API_KEY')
+        TIKTOK_API_KEY         = credentials('TIKTOK_API_KEY')
         
         // OCI Storage
         OCI_STORAGE_ACCESS_KEY = credentials('STORAGE_ACCESS_KEY')
@@ -116,13 +119,19 @@ pipeline {
                     script {
                         def envContent = """
 GROQ_API_KEY=${GROQ_API_KEY}
+OPENAI_API_KEY=${OPENAI_API_KEY}
+ELEVENLABS_API_KEY=${ELEVENLABS_API_KEY}
+PEXELS_API_KEY=${PEXELS_API_KEY}
 TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
 TELEGRAM_ADMIN_ID=${TELEGRAM_ADMIN_ID}
 POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
 REDIS_PASSWORD=${REDIS_PASSWORD}
 JWT_SECRET_KEY=${JWT_SECRET_KEY}
 # Networking
-PRODUCTION_DOMAIN=${PRODUCTION_DOMAIN}
+PRODUCTION_DOMAIN=${params.PRODUCTION_DOMAIN}
+# AI Control
+VOICE_ENGINE=${params.VOICE_ENGINE}
+MONETIZATION_MODE=${params.MONETIZATION_MODE}
 # OAuth
 GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
 GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
