@@ -17,7 +17,8 @@ class VideoDownloader:
         output_path = os.path.join(self.download_dir, f"{file_id}.%(ext)s")
         
         ydl_opts = {
-            'format': 'bestvideo[height<=1080]+bestaudio/best[height<=1080]',
+            # Resilient format selector: Try high-quality mp4 merge first, fallback to best overall
+            'format': 'bestvideo[height<=1080][ext=mp4]+bestaudio[ext=m4a]/best[height<=1080]/best',
             'outtmpl': output_path,
             'merge_output_format': 'mp4',
             'quiet': True,
@@ -46,6 +47,17 @@ class VideoDownloader:
                 final_path = ydl.prepare_filename(info)
                 return final_path
         except Exception as e:
+            # Fallback for "Requested format is not available"
+            if "format is not available" in str(e):
+                print(f"[VideoDownloader] Retrying {url} with absolute best format fallback...")
+                ydl_opts['format'] = 'best'
+                try:
+                    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                        info = ydl.extract_info(url, download=True)
+                        return ydl.prepare_filename(info)
+                except Exception as e2:
+                    print(f"[VideoDownloader] Second attempt failed: {str(e2)}")
+            
             print(f"[VideoDownloader] ERROR downloading {url}: {str(e)}")
             return None
 
@@ -59,6 +71,7 @@ class VideoDownloader:
             'no_warnings': True,
             'simulate': True,
             'skip_download': True,
+            'format': 'best', # Explicitly use best for validation
         }
         
         # Add cookies for validation bypass
