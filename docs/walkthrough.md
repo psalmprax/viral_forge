@@ -27,6 +27,7 @@ Visual mission control for high-fidelity automation pipelines. Features a drag-a
 - **Phase 16.2: Route Layer Hotfix**: Resolved a Python `NameError` in the video route by fixing a missing `Optional` import from the `typing` module.
 - **Phase 18: YouTube Bot Detection Bypass**: Implemented authenticated cookie support to bypass "Sign in" restrictions on cloud infrastructure (OCI). Includes CI/CD persistence and security hardening for session data.
 - **Phase 18.4: Hyper-Resiliency (Validation Fix)**: Resolved "Requested format is not available" errors by standardizing `yt-dlp` updates in Docker and broadening format fallbacks for YouTube Shorts.
+- **Phase 18.5: Signature Decryption (n-Challenge)**: Addressed "n challenge solving failed" warnings by integrating a JavaScript runtime (`nodejs`) into the API container for advanced signature decoding.
 
 ViralForge has transitioned from prototype configuration to production-grade infrastructure:
 

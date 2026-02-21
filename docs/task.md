@@ -144,3 +144,6 @@
 ## Phase 18.4: Hyper-Resiliency (Validation Fix)
 - [x] Remove restrictive `format: best` from `verify_video_asset`
 - [x] Broaden download fallback chain to `ydl_opts.pop('format')` as last resort
+
+## Phase 18.5: Signature Decryption (n-Challenge)
+- [x] Add `nodejs` (JavaScript runtime) to `api/Dockerfile` for `yt-dlp` challenge solving

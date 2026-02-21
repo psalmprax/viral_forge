@@ -3,12 +3,14 @@ FROM ${BASE_IMAGE}
 
 WORKDIR /app
 
-# Install System Dependencies (FFmpeg, Image processing libs)
+# Install System Dependencies (FFmpeg, Image processing libs, and JS runtime for yt-dlp)
 RUN apt-get update && apt-get install -y \
     ffmpeg \
     libgl1 \
     libglib2.0-0 \
     curl \
+    nodejs \
+    npm \
     && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt .
