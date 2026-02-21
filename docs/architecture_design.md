@@ -1,7 +1,7 @@
 # ViralForge: Architecture Design
 
-> **Last Updated**: 2026-02-20  
-> **Version**: 2.2 — Production-Hardened Autonomous Platform
+> **Last Updated**: 2026-02-21  
+> **Version**: 2.3 — Multimodal AI Director (VLM Integrated)
 
 ---
 
@@ -63,10 +63,11 @@
 | Service | Port | Technology | Purpose |
 |---|---|---|---|
 | `api` | 8000 | FastAPI (Python) + Node.js | Main REST API + Signature Solving |
+| `VLMService` | — | Gemini 1.5 Flash | Visual intuition & aesthetic reasoning |
 | `dashboard` | 3000 | Next.js 14 | Frontend SPA |
 | `db` | 5432 | PostgreSQL 15 | Primary database |
 | `redis` | 6379 | Redis 7 | Cache + Celery broker |
-| `celery` | — | Celery 5 | Background task workers |
+| `celery` | — | Celery 5 (Scaled x3) | High-concurrency background task workers |
 | `celery-beat` | — | Celery Beat | Scheduled task scheduler |
 | `discovery-go` | 8080 | Go 1.21 | High-speed trend scanner |
 | `voiceover` | 8080 | FastAPI (Python) | Local neural voice synthesis (Fish Speech) |
@@ -159,6 +160,10 @@ yt-dlp Download
     ▼
 FFmpeg Analysis (duration, resolution, codec)
     │
+    ▼
+VLM Visual Intuition (Gemini 1.5 Flash)
+    │   - Detect Mood, Lighting, Subjects
+    │   - Suggest aesthetic strategy
     ▼
 MoviePy Transformation:
   ├── Mirror (horizontal flip)

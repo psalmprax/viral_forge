@@ -1,7 +1,7 @@
 # ViralForge: Implementation Plan (Current & Future)
 
-> **Last Updated**: 2026-02-20  
-> **Version**: 2.2 — Production-Hardened Autonomous Platform
+> **Last Updated**: 2026-02-21  
+> **Version**: 2.3 — Multimodal AI Director (VLM Integrated)
 
 ---
 
@@ -179,6 +179,14 @@ Integrate **Fish Speech** (Open Source weights) as a containerized service.
 - **Cookie-Based Proof**: Implementation of authenticated session cookies for `yt-dlp` to bypass "Confirm you're not a bot" screens.
 - **Persistence**: Hybrid CI/CD logic to exclude session data from being scrubbed during Jenkins deployments.
 - **Signature Decryption (Phase 18.5)**: Integration of `nodejs` runtime into the API container to solve YouTube "n-challenge" signature decryption, ensuring full access to video streams on cloud infrastructure.
+
+### Component 10: High-Artistry & VLM Intuition (Phase 19 & 20)
+- **OCR Awareness**: Implementation of [**`OCRService`**](file:///home/psalmprax/viral_forge/services/video_engine/ocr_service.py) for text-region detection, preventing caption overlap.
+- **Semantic Trimming**: AI-driven "hook" detection to keep only high-energy segments.
+- **Visual Cortex**: Integration of **Gemini 1.5 Flash** via [**`VLMService`**](file:///home/psalmprax/viral_forge/services/video_engine/vlm_service.py) for true visual intuition (mood, lighting, subject analysis).
+- **Dynamic Aesthetics**: Automated caption color and grading selection based on visual mood.
+- **Stock Injection**: Pexels API integration for automated cinematic B-roll insertion.
+- **Infrastructural Scale**: Scaled `celery_worker` to 3 replicas for high-concurrency production.
 
 ---
 
