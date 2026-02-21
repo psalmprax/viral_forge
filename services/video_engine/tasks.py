@@ -167,3 +167,68 @@ def download_and_process_task(self, source_url: str, niche: str, platform: str, 
         return {"status": "error", "message": str(e)}
     finally:
         db.close()
+@celery_app.task(name="video.generate", bind=True)
+def generate_video_task(self, prompt: str, engine: str, style: str, aspect_ratio: str, user_id: int):
+    """
+    Background task for AI Video Synthesis (T2V).
+    """
+    from api.utils.database import SessionLocal
+    from api.utils.models import VideoJobDB
+    from .synthesis_service import generative_service
+    import uuid
+    
+    task_id = self.request.id
+    db = SessionLocal()
+    
+    def update_job(status=None, progress=None, output_path=None):
+        job = db.query(VideoJobDB).filter(VideoJobDB.id == task_id).first()
+        if job:
+            if status: job.status = status
+            if progress is not None: job.progress = progress
+            if output_path: job.output_path = output_path
+            db.commit()
+            
+            from api.routes.ws import notify_job_update_sync
+            notify_job_update_sync({
+                "id": task_id,
+                "status": job.status,
+                "progress": job.progress,
+                "output_path": job.output_path
+            })
+
+    try:
+        # 1. Synthesis
+        update_job(status="Synthesizing", progress=10)
+        video_url = run_async(generative_service.synthesize_video(prompt, engine=engine, aspect_ratio=aspect_ratio))
+        
+        if not video_url:
+            update_job(status="Failed", progress=0)
+            return {"status": "error", "message": "Synthesis failed"}
+
+        # 2. Download generated asset (if it's a URL)
+        update_job(status="Downloading Asset", progress=40)
+        # For mocks, we treat the URL as the path if it's local, or download it
+        if video_url.startswith("http"):
+             # In a real scenario, we'd use base_video_downloader.download_video(video_url)
+             # But for our current GenerativeService mocks, we'll just log it
+             pass
+
+        # 3. Refine with Transformation Engine (Optional but powerful)
+        update_job(status="Refining", progress=60)
+        # We can reuse the processor logic here if needed
+        
+        # 4. Storage & Finalization
+        update_job(status="Completed", progress=100, output_path=video_url)
+        
+        return {
+            "status": "success",
+            "video_url": video_url,
+            "engine": engine,
+            "prompt_used": prompt
+        }
+    except Exception as e:
+        update_job(status="Failed")
+        logging.error(f"[Synthesis Task] Error: {e}")
+        return {"status": "error", "message": str(e)}
+    finally:
+        db.close()

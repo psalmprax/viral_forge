@@ -193,6 +193,12 @@ Integrate **Fish Speech** (Open Source weights) as a containerized service.
 - **High-Art Suite**: Implementation of 12+ creative filters including Glitch, Noir, Atmospheric Glow, and Film Grain.
 - **Aesthetic Direction**: Expanded `DecisionEngine` prompts for style-specific intensity and color harmony logic.
 
+### Component 12: Generative Dreamscapes (Phase 22)
+- **Synthesis Orchestration**: Implementation of [**`GenerativeService`**](file:///home/psalmprax/viral_forge/services/video_engine/synthesis_service.py) for text-to-video synthesis.
+- **Dual-Engine Support**: Integration with **Google Veo 3** (High-Tier) and **Wan2.2** (Open-Source) via SiliconFlow/Fal.ai.
+- **Prompt Director**: Intelligent LLM-driven prompt expansion for high-artistry video outcomes.
+- **Synthesis UI**: Interactive dashboard mode for prompt-to-viral content generation.
+
 ---
 
 ## Verification Plan

@@ -5,7 +5,8 @@ from api.utils.database import SessionLocal
 from api.utils.models import VideoJobDB
 from api.routes.auth import get_current_user
 from api.utils.user_models import UserDB
-from services.video_engine.tasks import download_and_process_task
+from services.video_engine.tasks import download_and_process_task, generate_video_task
+from services.video_engine.synthesis_service import generative_service
 import logging
 
 router = APIRouter(prefix="/video", tags=["Video Engine"])
@@ -15,6 +16,12 @@ class TransformationRequest(BaseModel):
     niche: str = "Motivation"
     platform: str = "YouTube Shorts"
     style: Optional[str] = "Default"
+
+class GenerationRequest(BaseModel):
+    prompt: str
+    engine: str = "veo3" # beo3, wan2.2
+    style: str = "Cinematic"
+    aspect_ratio: str = "9:16"
 
 
 @router.post("/transform")
@@ -179,6 +186,47 @@ async def test_drive(request: TestDriveRequest, current_user: UserDB = Depends(g
     except Exception as e:
         import traceback
         logging.error(f"[TestDrive] Error: {e}\n{traceback.format_exc()}")
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        db.close()
+
+@router.post("/generate")
+async def start_generation(request: GenerationRequest, current_user: UserDB = Depends(get_current_user)):
+    """
+    Triggers an AI video synthesis task.
+    """
+    db = SessionLocal()
+    try:
+        # 1. Optimize Prompt
+        optimized_prompt = generative_service.optimize_prompt(request.prompt, request.style)
+        
+        # 2. Trigger Synthesis Task
+        task = generate_video_task.delay(
+            prompt=optimized_prompt,
+            engine=request.engine,
+            style=request.style,
+            aspect_ratio=request.aspect_ratio,
+            user_id=current_user.id
+        )
+        
+        # 3. Create Job Entry
+        new_job = VideoJobDB(
+            id=task.id,
+            title=f"AI Synthesis - {request.engine}",
+            status="Queued",
+            progress=0,
+            input_url="Generation Prompt",
+            user_id=current_user.id
+        )
+        db.add(new_job)
+        db.commit()
+        
+        return {
+            "message": "Generation started",
+            "task_id": task.id,
+            "optimized_prompt": optimized_prompt
+        }
+    except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
     finally:
         db.close()
