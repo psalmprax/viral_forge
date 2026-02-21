@@ -155,15 +155,14 @@ class DiscoveryService:
         """
         AI identifies related sub-niches and triggers background scans to hit transparency targets.
         """
-        from groq import Groq
-        from api.config import settings
-        import json
-        
-        if not settings.GROQ_API_KEY:
+        from api.utils.vault import get_secret
+        groq_key = get_secret("groq_api_key")
+        if not groq_key:
             return
 
         try:
-            client = Groq(api_key=settings.GROQ_API_KEY)
+            from groq import Groq
+            client = Groq(api_key=groq_key)
             titles = [c.title for c in candidates[:10]]
             
             prompt = f"""
@@ -197,12 +196,13 @@ class DiscoveryService:
         """
         Uses Groq with parallel batching and high-speed models to rank candidates.
         """
-        from groq import Groq
-        from api.config import settings
-        import json
+        from api.utils.vault import get_secret
+        groq_key = get_secret("groq_api_key")
+        if not groq_key:
+            return candidates
 
         try:
-            client = Groq(api_key=settings.GROQ_API_KEY)
+            client = Groq(api_key=groq_key)
             
             # Analyze top 20 candidates in a single high-speed batch
             candidate_summaries = []

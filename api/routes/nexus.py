@@ -20,6 +20,7 @@ class NexusComposeRequest(BaseModel):
     script_segments: Optional[List[dict]] = []
     generate_thumbnail: bool = False
     cinema_mode: bool = False
+    blueprint_id: Optional[str] = "viral-reskin"
 
 async def run_nexus_composition(job_id: int, request: NexusComposeRequest, db: Session):
     from services.nexus_engine.thumbnail_service import base_thumbnail_generator
@@ -28,6 +29,8 @@ async def run_nexus_composition(job_id: int, request: NexusComposeRequest, db: S
     try:
         job.status = "COMPOSING"
         db.commit()
+        from api.routes.ws import notify_nexus_job_update_sync
+        notify_nexus_job_update_sync({"id": str(job.id), "status": job.status, "progress": 10, "niche": job.niche})
         
         output_path = None
         
@@ -38,8 +41,16 @@ async def run_nexus_composition(job_id: int, request: NexusComposeRequest, db: S
                 topic=request.topic,
                 niche=request.niche
             )
+        elif request.blueprint_id == "story-factory":
+             # 2. Strategy for Storytelling Blueprint
+             # For now, route to auto creator with a storytelling prompt
+             output_path = await base_auto_creator.create_cinema_video(
+                job_id=job_id,
+                topic="The future of AI Automation", # Example
+                niche=request.niche
+            )
         else:
-            # 2. Manual Nexus Assembly
+            # 3. Manual Nexus Assembly or Viral Reskin (Default)
             # Thumbnail Generation (if requested)
             if request.generate_thumbnail:
                 script_text = " ".join([s.get("text", "") for s in request.script_segments])
@@ -58,11 +69,15 @@ async def run_nexus_composition(job_id: int, request: NexusComposeRequest, db: S
         job.status = "COMPLETED"
         job.output_path = output_path
         job.progress = 100
+        from api.routes.ws import notify_nexus_job_update_sync
+        notify_nexus_job_update_sync({"id": str(job.id), "status": job.status, "progress": 100, "niche": job.niche})
     except Exception as e:
         import traceback
         logging.error(f"[Nexus] Error: {e}\n{traceback.format_exc()}")
         job.status = "FAILED"
         job.error_log = str(e)
+        from api.routes.ws import notify_nexus_job_update_sync
+        notify_nexus_job_update_sync({"id": str(job.id), "status": job.status, "progress": 0, "niche": job.niche, "error": str(e)})
     finally:
         db.commit()
 
@@ -83,6 +98,13 @@ async def compose_video(request: NexusComposeRequest, background_tasks: Backgrou
     background_tasks.add_task(run_nexus_composition, new_job.id, request, db)
     
     return {"status": "accepted", "job_id": new_job.id}
+
+@router.get("/jobs")
+async def list_nexus_jobs(current_user = Depends(get_current_user), db: Session = Depends(get_db)):
+    """
+    Returns the latest production jobs for the Nexus matrix.
+    """
+    return db.query(NexusJobDB).filter(NexusJobDB.user_id == current_user.id).order_by(NexusJobDB.created_at.desc()).limit(10).all()
 
 @router.get("/job/{job_id}")
 async def get_nexus_job(job_id: int, current_user = Depends(get_current_user), db: Session = Depends(get_db)):

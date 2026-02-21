@@ -82,7 +82,18 @@ export function useWebSocket<T>(url: string) {
 
             socket.onerror = (error) => {
                 if (!isMounted.current) return;
+                // Log more diagnostic information
                 console.error(`[WS] Error for ${url}:`, error);
+                console.error(`[WS] ReadyState: ${socket.readyState} (0=CONNECTING, 1=OPEN, 2=CLOSING, 3=CLOSED)`);
+                console.error(`[WS] URL: ${socket.url}`);
+
+                // Log additional details if available
+                if (error && typeof error === 'object' && 'target' in error) {
+                    const target = (error as any).target;
+                    if (target) {
+                        console.error(`[WS] Target readyState: ${target.readyState}`);
+                    }
+                }
             };
 
             ws.current = socket;
@@ -96,7 +107,7 @@ export function useWebSocket<T>(url: string) {
 
     useEffect(() => {
         isMounted.current = true;
-        
+
         // Longer delay to ensure component is fully mounted and network is ready
         const initTimeout = setTimeout(() => {
             console.log(`[WS] Initial connection attempt to ${url}`);

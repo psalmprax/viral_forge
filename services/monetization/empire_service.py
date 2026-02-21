@@ -84,19 +84,42 @@ class EmpireService:
 
     def get_winning_blueprints(self, db: Session, user_id: int) -> List[Dict[str, Any]]:
         """
-        Fetches high-performing content variants to serve as "blueprints".
+        Fetches proven patterns from A/B test winners to serve as "blueprints".
         """
-        top_posts = db.query(PublishedContentDB).filter(
-            PublishedContentDB.user_id == user_id
-        ).order_by(PublishedContentDB.view_count.desc()).limit(5).all()
+        from api.utils.models import ABTestDB
+        
+        # Query A/B tests with confirmed winners
+        winning_tests = db.query(ABTestDB).filter(
+            ABTestDB.winner_variant != None
+        ).order_by(ABTestDB.created_at.desc()).limit(10).all()
 
-        return [{
-            "id": post.id,
-            "title": f"Niche Alpha-Node {post.platform}",
-            "niche": post.niche,
-            "performance": f"{post.view_count} views",
-            "status": "Verified Pattern"
-        } for post in top_posts]
+        blueprints = []
+        for test in winning_tests:
+            winner_title = test.variant_a_title if test.winner_variant == 'A' else test.variant_b_title
+            blueprints.append({
+                "id": f"ab_{test.id}",
+                "title": winner_title,
+                "niche": "Pattern Proved via A/B",
+                "performance": f"{max(test.variant_a_views, test.variant_b_views)} views",
+                "status": "A/B Data Validated"
+            })
+
+        # Fallback to high-performing content if not enough A/B tests
+        if len(blueprints) < 5:
+            top_posts = db.query(PublishedContentDB).filter(
+                PublishedContentDB.user_id == user_id
+            ).order_by(PublishedContentDB.view_count.desc()).limit(5).all()
+            
+            for post in top_posts:
+                blueprints.append({
+                    "id": f"post_{post.id}",
+                    "title": f"Viral Node {post.platform}",
+                    "niche": post.niche,
+                    "performance": f"{post.view_count} views",
+                    "status": "Verified Reach"
+                })
+
+        return blueprints[:10]
 
     async def clone_strategy(self, db: Session, user_id: int, source_niche: str, target_niche: str) -> bool:
         """

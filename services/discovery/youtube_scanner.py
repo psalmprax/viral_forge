@@ -7,17 +7,20 @@ from googleapiclient.discovery import build
 import datetime
 import re
 
+from api.utils.vault import get_secret
+
 class YouTubeShortsScanner(TrendScanner):
     async def scan_trends(self, niche: str, published_after: Optional[datetime.datetime] = None) -> List[ContentCandidate]:
         """
         Scans YouTube for trending Shorts in a specific niche using the Data API v3.
         """
-        if not settings.YOUTUBE_API_KEY:
+        api_key = get_secret("youtube_api_key")
+        if not api_key:
             print("[YouTubeScanner] WARNING: No YOUTUBE_API_KEY found. Falling back to mock data.")
             return self._get_mock_data(niche)
 
         try:
-            youtube = build("youtube", "v3", developerKey=settings.YOUTUBE_API_KEY)
+            youtube = build("youtube", "v3", developerKey=api_key)
             
             # 1. Search for trending videos in the niche
             # We filter for 'short' duration and 'video' type

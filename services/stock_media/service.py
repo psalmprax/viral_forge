@@ -1,11 +1,13 @@
-import httpx
 import logging
 from typing import List, Dict, Any
-from api.config import settings
+from api.utils.vault import get_secret
 
 class StockMediaService:
+    @property
+    def api_key(self):
+        return get_secret("pexels_api_key")
+
     def __init__(self):
-        self.api_key = settings.PEXELS_API_KEY
         self.base_url = "https://api.pexels.com/videos"
 
     async def search_videos(self, query: str, per_page: int = 5) -> List[Dict[str, Any]]:

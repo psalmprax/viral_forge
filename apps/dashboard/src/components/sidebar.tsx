@@ -23,6 +23,7 @@ const navItems = [
     { name: "Dashboard", href: "/", icon: LayoutDashboard },
     { name: "Discovery", href: "/discovery", icon: Search },
     { name: "Creation", href: "/creation", icon: Sparkles },
+    { name: "Nexus Flow", href: "/nexus", icon: Zap },
     { name: "Transformation", href: "/transformation", icon: Video },
     { name: "Publishing", href: "/publishing", icon: Share2 },
     { name: "Analytics", href: "/analytics", icon: BarChart3 },

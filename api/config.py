@@ -43,11 +43,11 @@ class Settings(BaseSettings):
     
     @property
     def GOOGLE_REDIRECT_URI(self) -> str:
-        return f"{self.PRODUCTION_DOMAIN}/publish/auth/youtube/callback"
+        return f"{self.PRODUCTION_DOMAIN.rstrip('/')}/publish/auth/youtube/callback"
 
     @property
     def TIKTOK_REDIRECT_URI(self) -> str:
-        return f"{self.PRODUCTION_DOMAIN}/publish/auth/tiktok/callback"
+        return f"{self.PRODUCTION_DOMAIN.rstrip('/')}/publish/auth/tiktok/callback"
     
     # Multi-Cloud Storage Engine
     STORAGE_PROVIDER: str = "LOCAL"  # Options: AWS, OCI, GCP, AZURE, CUSTOM, LOCAL
@@ -66,6 +66,20 @@ class Settings(BaseSettings):
     # Database & Redis
     DATABASE_URL: str = "sqlite:///./viral_forge.db"
     REDIS_URL: str = "redis://localhost:6379/0"
+    
+    # Validation Warning
+    def validate_critical_config(self):
+        """
+        Runs a mission-critical check of environment variables.
+        """
+        missing_critical = []
+        if self.ENV == "production":
+            if not self.GOOGLE_CLIENT_ID: missing_critical.append("GOOGLE_CLIENT_ID")
+            if not self.TIKTOK_CLIENT_KEY: missing_critical.append("TIKTOK_CLIENT_KEY")
+            if self.SECRET_KEY.startswith("dev_"): missing_critical.append("SECRET_KEY (insecure)")
+            if "localhost" in self.PRODUCTION_DOMAIN: missing_critical.append("PRODUCTION_DOMAIN (pointing to localhost)")
+            
+        return missing_critical
 
     class Config:
         env_file = ".env"
@@ -74,13 +88,11 @@ class Settings(BaseSettings):
 
 settings = Settings()
 
-# Validation Warning for Production
-if settings.ENV == "production":
-    missing_critical = []
-    if not settings.GOOGLE_CLIENT_ID: missing_critical.append("GOOGLE_CLIENT_ID")
-    if not settings.TIKTOK_CLIENT_KEY: missing_critical.append("TIKTOK_CLIENT_KEY")
-    if settings.SECRET_KEY.startswith("dev_"): missing_critical.append("SECRET_KEY (using default)")
-    
-    if missing_critical:
-        print(f"⚠️  WARNING: Production environment detected but critical keys are missing: {', '.join(missing_critical)}")
-
+# Immediate startup validation
+warnings = settings.validate_critical_config()
+if warnings:
+    print("\n" + "!" * 80)
+    print(f"⚠️ CONFIGURATION ALERT: Detected {len(warnings)} critical gaps for {settings.ENV} mode")
+    for w in warnings:
+        print(f"  - {w}")
+    print("!" * 80 + "\n")

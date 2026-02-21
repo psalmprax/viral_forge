@@ -1,71 +1,95 @@
 "use client";
 
-import React, { useRef, useMemo } from 'react';
-import { Canvas, useFrame } from '@react-three/fiber';
-import { Sphere, MeshDistortMaterial, Float, Stars, PerspectiveCamera } from '@react-three/drei';
+import React, { useRef, useMemo, useState, useLayoutEffect } from 'react';
+import { Canvas, useFrame, useThree } from '@react-three/fiber';
+import { Sphere, MeshDistortMaterial, Float, Stars, PerspectiveCamera, MeshTransmissionMaterial } from '@react-three/drei';
 import * as THREE from 'three';
 
-function Globe({ pulseIntensity = 1 }: { pulseIntensity?: number }) {
-    const meshRef = useRef<THREE.Mesh>(null);
-    const glowRef = useRef<THREE.Mesh>(null);
+function NeuralWeb({ pulseIntensity = 1 }: { pulseIntensity?: number }) {
+    const groupRef = useRef<THREE.Group>(null);
+    const geoRef = useRef<THREE.BufferGeometry>(null);
+    const { mouse } = useThree();
+
+    // Generate nodes and connections
+    const { nodes, linePositions } = useMemo(() => {
+        const nodeCount = 120;
+        const pts: THREE.Vector3[] = [];
+        for (let i = 0; i < nodeCount; i++) {
+            const phi = Math.acos(-1 + (2 * i) / nodeCount);
+            const theta = Math.sqrt(nodeCount * Math.PI) * phi;
+            pts.push(new THREE.Vector3().setFromSphericalCoords(2.1, phi, theta));
+        }
+
+        const lines: number[] = [];
+        const maxDist = 0.8;
+        for (let i = 0; i < pts.length; i++) {
+            let matches = 0;
+            for (let j = i + 1; j < pts.length; j++) {
+                if (pts[i].distanceTo(pts[j]) < maxDist && matches < 3) {
+                    lines.push(pts[i].x, pts[i].y, pts[i].z, pts[j].x, pts[j].y, pts[j].z);
+                    matches++;
+                }
+            }
+        }
+        return { nodes: pts, linePositions: new Float32Array(lines) };
+    }, []);
+
+    useLayoutEffect(() => {
+        if (geoRef.current) {
+            geoRef.current.setAttribute('position', new THREE.BufferAttribute(linePositions, 3));
+        }
+    }, [linePositions]);
 
     useFrame((state) => {
-        if (meshRef.current) {
-            meshRef.current.rotation.y += 0.002;
-            meshRef.current.rotation.x += 0.001;
-        }
-        if (glowRef.current) {
-            glowRef.current.rotation.y -= 0.001;
-            const s = 1.2 + Math.sin(state.clock.elapsedTime * 2) * 0.05 * pulseIntensity;
-            glowRef.current.scale.set(s, s, s);
+        if (groupRef.current) {
+            // Mouse Parallax
+            groupRef.current.rotation.y = THREE.MathUtils.lerp(groupRef.current.rotation.y, mouse.x * 0.4, 0.05);
+            groupRef.current.rotation.x = THREE.MathUtils.lerp(groupRef.current.rotation.x, -mouse.y * 0.4, 0.05);
+
+            // Auto rotation base
+            groupRef.current.rotation.y += 0.001;
         }
     });
 
-    const points = useMemo(() => {
-        const p = [];
-        for (let i = 0; i < 200; i++) {
-            const phi = Math.acos(-1 + (2 * i) / 200);
-            const theta = Math.sqrt(200 * Math.PI) * phi;
-            p.push(new THREE.Vector3().setFromSphericalCoords(2.05, phi, theta));
-        }
-        return p;
-    }, []);
-
     return (
-        <group>
-            {/* Core Sphere */}
-            <Sphere ref={meshRef} args={[2, 64, 64]}>
-                <MeshDistortMaterial
-                    color="#000000"
-                    speed={2}
-                    distort={0.3}
-                    roughness={0.1}
-                    metalness={1}
+        <group ref={groupRef}>
+            {/* Core Neural Shell */}
+            <Sphere args={[2, 64, 64]}>
+                <MeshTransmissionMaterial
+                    backside
+                    samples={8}
+                    thickness={1.2}
+                    chromaticAberration={0.05}
+                    anisotropy={0.2}
+                    distortion={0.2}
+                    distortionScale={0.1}
+                    temporalDistortion={0.1}
+                    color="#001a1a"
+                    roughness={0}
                 />
             </Sphere>
 
-            {/* Neural Web (Points) */}
-            <group>
-                {points.map((pos, i) => (
-                    <mesh key={i} position={pos}>
-                        <sphereGeometry args={[0.02, 8, 8]} />
-                        <meshBasicMaterial color="#00f2ff" />
-                    </mesh>
-                ))}
-            </group>
+            {/* Glowing Nodes */}
+            {nodes.map((pos, i) => (
+                <mesh key={`node-${i}`} position={pos}>
+                    <sphereGeometry args={[0.015, 8, 8]} />
+                    <meshBasicMaterial
+                        color={i % 3 === 0 ? "#00f2ff" : "#10b981"}
+                        transparent
+                        opacity={0.8}
+                    />
+                </mesh>
+            ))}
 
-            {/* Atmospheric Glow */}
-            <Sphere ref={glowRef} args={[2.1, 64, 64]}>
-                <meshBasicMaterial
-                    color="#00f2ff"
-                    transparent
-                    opacity={0.05}
-                    wireframe
-                />
-            </Sphere>
+            {/* Neural Connections (Unified LineSegments) */}
+            <lineSegments>
+                <bufferGeometry ref={geoRef} />
+                <lineBasicMaterial color="#00f2ff" transparent opacity={0.15} />
+            </lineSegments>
 
-            <ambientLight intensity={0.5} />
-            <pointLight position={[10, 10, 10]} intensity={1} color="#00f2ff" />
+            <ambientLight intensity={0.2} />
+            <pointLight position={[10, 10, 10]} intensity={1.5} color="#00f2ff" />
+            <pointLight position={[-10, -10, -10]} intensity={1} color="#10b981" />
         </group>
     );
 }
@@ -73,16 +97,16 @@ function Globe({ pulseIntensity = 1 }: { pulseIntensity?: number }) {
 export default React.memo(function GlobalPulseGlobe({ pulseIntensity }: { pulseIntensity?: number }) {
     return (
         <div
-            className="h-[400px] w-full relative pointer-events-none"
+            className="h-[600px] w-full relative"
             role="img"
-            aria-label="Animated 3D globe visualization showing global neural network activity"
+            aria-label="Premium 3D neural globe visualization"
         >
-            <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-zinc-950 z-10" />
-            <Canvas>
+            <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-zinc-950/80 z-10 pointer-events-none" />
+            <Canvas shadows gl={{ antialias: true }}>
                 <PerspectiveCamera makeDefault position={[0, 0, 8]} />
-                <Stars radius={100} depth={50} count={5000} factor={4} saturation={0} fade speed={1} />
-                <Float speed={2} rotationIntensity={1} floatIntensity={1}>
-                    <Globe pulseIntensity={pulseIntensity} />
+                <Stars radius={100} depth={50} count={3000} factor={2} saturation={0} fade speed={1} />
+                <Float speed={1.5} rotationIntensity={0.5} floatIntensity={0.5}>
+                    <NeuralWeb pulseIntensity={pulseIntensity} />
                 </Float>
             </Canvas>
         </div>

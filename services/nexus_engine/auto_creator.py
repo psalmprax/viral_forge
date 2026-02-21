@@ -1,16 +1,24 @@
-import json
-import logging
-import uuid
-import os
-from typing import List, Dict, Any
-from groq import AsyncGroq
-from api.config import settings
-from services.nexus_engine.orchestrator import base_nexus_orchestrator
+from api.utils.vault import get_secret
 
 class AutoCreator:
     def __init__(self):
-        self.client = AsyncGroq(api_key=settings.GROQ_API_KEY)
+        self._client = None
+        self._last_key = None
         self.model = "llama-3.3-70b-versatile"
+
+    @property
+    def client(self):
+        key = get_secret("groq_api_key")
+        if not key:
+            return None
+        
+        if self._client and self._last_key == key:
+            return self._client
+
+        from groq import AsyncGroq
+        self._client = AsyncGroq(api_key=key)
+        self._last_key = key
+        return self._client
 
     async def generate_viral_script(self, topic: str, niche: str) -> List[Dict]:
         """

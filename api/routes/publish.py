@@ -9,6 +9,7 @@ from pydantic import BaseModel
 from google_auth_oauthlib.flow import Flow
 from api.config import settings
 from api.routes.auth import get_current_user
+from api.utils.vault import get_secret
 from api.utils.user_models import UserDB
 # from api.utils.user_models import UserDB # Deprecated import
 from api.utils.database import SessionLocal
@@ -28,11 +29,17 @@ async def auth_youtube():
     """
     Starts the YouTube OAuth flow.
     """
+    client_id = get_secret("google_client_id")
+    client_secret = get_secret("google_client_secret")
+    
+    if not client_id or not client_secret:
+        raise HTTPException(status_code=400, detail="Google OAuth Credentials not configured in Vault.")
+
     flow = Flow.from_client_config(
         {
             "web": {
-                "client_id": settings.GOOGLE_CLIENT_ID,
-                "client_secret": settings.GOOGLE_CLIENT_SECRET,
+                "client_id": client_id,
+                "client_secret": client_secret,
                 "auth_uri": "https://accounts.google.com/o/oauth2/auth",
                 "token_uri": "https://oauth2.googleapis.com/token",
             }
@@ -51,8 +58,8 @@ async def auth_youtube_callback(code: str, state: str):
     flow = Flow.from_client_config(
         {
             "web": {
-                "client_id": settings.GOOGLE_CLIENT_ID,
-                "client_secret": settings.GOOGLE_CLIENT_SECRET,
+                "client_id": get_secret("google_client_id"),
+                "client_secret": get_secret("google_client_secret"),
                 "auth_uri": "https://accounts.google.com/o/oauth2/auth",
                 "token_uri": "https://oauth2.googleapis.com/token",
             }
@@ -108,8 +115,11 @@ async def auth_tiktok():
     """
     Starts the TikTok OAuth flow.
     """
-    client_key = settings.TIKTOK_CLIENT_KEY
+    client_key = get_secret("tiktok_client_key")
     redirect_uri = settings.TIKTOK_REDIRECT_URI
+    
+    if not client_key:
+        raise HTTPException(status_code=400, detail="TikTok Client Key not configured in Vault.")
     scope = "video.upload,user.info.basic"
     # Basic validation to prevent crashing if keys are missing
     import urllib.parse
@@ -142,8 +152,8 @@ async def auth_tiktok_callback(code: str):
     url = "https://open.tiktokapis.com/v2/oauth/token/"
     
     data = {
-        "client_key": settings.TIKTOK_CLIENT_KEY,
-        "client_secret": settings.TIKTOK_CLIENT_SECRET,
+        "client_key": get_secret("tiktok_client_key"),
+        "client_secret": get_secret("tiktok_client_secret"),
         "code": code,
         "grant_type": "authorization_code",
         "redirect_uri": settings.TIKTOK_REDIRECT_URI

@@ -128,3 +128,15 @@ def notify_job_update_sync(job_data: Dict):
         "data": job_data
     })
     r.publish("job_updates", message)
+
+def notify_nexus_job_update_sync(job_data: Dict):
+    """
+    Synchronous utility to publish Nexus specific job updates to Redis.
+    """
+    import redis as redis_sync
+    r = redis_sync.from_url(settings.REDIS_URL)
+    message = json.dumps({
+        "type": "nexus_job_update",
+        "data": job_data
+    })
+    r.publish("job_updates", message)

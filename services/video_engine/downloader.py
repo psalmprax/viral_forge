@@ -43,4 +43,26 @@ class VideoDownloader:
             print(f"[VideoDownloader] ERROR downloading {url}: {str(e)}")
             return None
 
+    async def verify_video_asset(self, url: str) -> bool:
+        """
+        Quickly inspects the URL to ensure it has a valid video stream.
+        """
+        ydl_opts = {
+            'quiet': True,
+            'no_warnings': True,
+            'simulate': True,
+            'skip_download': True,
+        }
+        try:
+            with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                info = ydl.extract_info(url, download=False)
+                # Check for video stream (vcodec != 'none')
+                if info.get('vcodec') == 'none' or not info.get('vcodec'):
+                    print(f"[VideoDownloader] VALIDATION FAILED: {url} is audio-only.")
+                    return False
+                return True
+        except Exception as e:
+            print(f"[VideoDownloader] Validation Error for {url}: {e}")
+            return False
+
 base_video_downloader = VideoDownloader()

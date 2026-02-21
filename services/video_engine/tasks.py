@@ -24,9 +24,9 @@ def cleanup_local_files(*paths):
                 logging.error(f"[Cleanup] Failed to delete {path}: {e}")
 
 @celery_app.task(name="video.download_and_process", bind=True)
-def download_and_process_task(self, source_url: str, niche: str, platform: str):
+def download_and_process_task(self, source_url: str, niche: str, platform: str, preview_only: bool = False, style: str = "Default"):
     """
-    Background task to download, process, and prepare a video.
+    Main background task to transform and publish content.
     """
     from api.utils.database import SessionLocal
     from api.utils.models import VideoJobDB
@@ -55,6 +55,15 @@ def download_and_process_task(self, source_url: str, niche: str, platform: str):
 
     try:
         # 1. Download
+        update_job(status="Validating", progress=5)
+        is_valid = run_async(base_video_downloader.verify_video_asset(source_url))
+        if not is_valid:
+            update_job(status="Failed", progress=0)
+            return {
+                "status": "failed",
+                "message": "Asset validation failed: Source appears to be audio-only or invalid."
+            }
+
         update_job(status="Downloading", progress=10)
         video_path = run_async(base_video_downloader.download_video(source_url))
         if not video_path:
@@ -70,9 +79,9 @@ def download_and_process_task(self, source_url: str, niche: str, platform: str):
         
         # B. Generate Strategy via Groq
         from services.decision_engine.service import base_strategy_service
-        strategy_obj = run_async(base_strategy_service.generate_visual_strategy(transcript, niche))
+        strategy_obj = run_async(base_strategy_service.generate_visual_strategy(transcript, niche, style=style))
         strategy = strategy_obj.dict()
-        logging.info(f"[Task] AI Strategy: {strategy['vibe']} (Speed: {strategy['speed_range']}, Jitter: {strategy['jitter_intensity']})")
+        logging.info(f"[Task] AI Strategy: {strategy['vibe']} (Style: {style}, Speed: {strategy['speed_range']}, Jitter: {strategy['jitter_intensity']})")
         
         update_job(status="Rendering", progress=50)
         
@@ -102,6 +111,20 @@ def download_and_process_task(self, source_url: str, niche: str, platform: str):
         # Get public URL for dashboard preview
         public_url = base_storage_service.get_public_url(storage_key)
         
+        if preview_only:
+            update_job(status="Completed", progress=100, output_path=public_url)
+            # Cleanup local artifacts (ONLY if cloud storage is active)
+            if settings.STORAGE_PROVIDER != "LOCAL":
+                cleanup_local_files(video_path, processed_path)
+            else:
+                cleanup_local_files(video_path)
+                
+            return {
+                "status": "success",
+                "preview_url": public_url,
+                "message": "Preview generated (Test Drive)"
+            }
+
         # 4. Upload to Social Platform
         update_job(status="Uploading", progress=85)
         url = ""

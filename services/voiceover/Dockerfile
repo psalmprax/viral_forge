@@ -13,7 +13,8 @@ WORKDIR /app
 # Note: In a real scenario, we would clone the repo and install from requirements.txt
 # Here we prepare the service wrapper dependencies
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir --default-timeout=100 --upgrade pip && \
+    pip install --no-cache-dir --default-timeout=100 -r requirements.txt
 
 # Copy service code
 COPY . .

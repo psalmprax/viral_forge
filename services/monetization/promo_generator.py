@@ -3,11 +3,13 @@ import json
 from typing import Dict, Any, List, Optional
 from groq import AsyncGroq
 from api.config import settings
+from api.utils.vault import get_secret
 from .commerce_service import base_commerce_service
 
 class PromoGenerator:
     def __init__(self):
-        self.client = AsyncGroq(api_key=settings.GROQ_API_KEY)
+        self.api_key = get_secret("groq_api_key")
+        self.client = AsyncGroq(api_key=self.api_key)
         self.commerce = base_commerce_service
         self.model = "llama-3.3-70b-versatile"
 

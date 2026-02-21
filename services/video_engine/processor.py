@@ -60,6 +60,10 @@ class VideoProcessor:
         
         final_clip = CompositeVideoClip([transformed] + overlays)
         
+        # IMPORTANT: Preserve original audio from the source video
+        if clip.audio:
+            final_clip = final_clip.with_audio(clip.audio)
+        
         output_path = os.path.join(self.output_dir, output_name)
         try:
             final_clip.write_videofile(output_path, codec=self.codec, audio_codec="aac")
@@ -172,6 +176,10 @@ class VideoProcessor:
             caption_clips.append(txt)
             
         final_clip = CompositeVideoClip(elements + caption_clips)
+        
+        # IMPORTANT: Preserve original audio from the source video
+        if clip.audio:
+            final_clip = final_clip.with_audio(clip.audio)
         output_path = os.path.join(self.output_dir, output_name)
         
         # Premium Render Settings
@@ -180,6 +188,7 @@ class VideoProcessor:
             "fps": 30,
             "threads": 4,
             "audio_codec": "aac",
+            "audio": True,  # Ensure audio is enabled
             "ffmpeg_params": [
                 "-crf", "18",        # Constant Rate Factor: 18 is visually lossless
                 "-maxrate", "12M",    # Target high-end social bitrate

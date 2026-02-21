@@ -52,6 +52,18 @@ ViralForge is a **fully autonomous, cloud-deployed content intelligence platform
 - **Domain Mapping**: Implemented a zero-cost domain mapping strategy using `sslip.io` to bypass Google OAuth's raw IP restrictions.
 - **Environment Agnostic**: The system uses `PRODUCTION_DOMAIN` to dynamically generate callback URLs, enabling seamless transitions between OCI ARM and local environments.
 
+### 16. Seamless Configuration Vault (No-Internet Secret Management)
+- **Vault Utility**: Implemented a dynamic secret resolver that prioritizes Database secrets over `.env`.
+- **Dashboard Integration**: Expanded the "Infrastructure" and "API Keys" sections in Settings to manage OCI, Groq, Pexels, and Social keys.
+- **Dynamic Propagation**: Core services (Storage, Discovery, Nexus, Voiceover) now re-load keys from the vault without requiring a restart.
+- **Privacy First**: Secrets are saved directly to the database via the dashboard, ensuring no sensitive data is exposed in plain text logs or third-party config managers.
+
+### 17. Viral Test Drive (One-Click Preview)
+- **Autonomous Lead Generation**: Added a "Test Drive" trigger to the Discovery dashboard that automatically identifies the #1 trending topic in a niche.
+- **Preview-Only Pipeline**: Modified the video engine to support a `preview_only` mode, generating the video and SEO package without publishing to social media.
+- **Outcome Preview Modal**: Developed a premium, glassmorphic video player modal to showcase the final transformed content.
+- **Real-Time Feedback**: Logic integrated with the WebSocket bridge to provide instant notification when a test-drive job is ready for review.
+
 ---
 ...
 (rest of the architecture and structured content follows)

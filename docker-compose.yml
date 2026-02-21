@@ -61,10 +61,10 @@ services:
     build:
       context: ./apps/dashboard
       args:
-        - NEXT_PUBLIC_API_URL=http://130.61.26.105:3000/api
+        - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://localhost:3000/api}
     # No host ports mapped directly to Dashboard anymore
     environment:
-      - NEXT_PUBLIC_API_URL=http://130.61.26.105:3000/api
+      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://localhost:3000/api}
 
   redis:
     image: redis:alpine

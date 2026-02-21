@@ -259,8 +259,10 @@ export default function AnalyticsPage() {
                         </div>
                     </div>
 
-                    <div className="flex-1 max-w-md hidden xl:block overflow-visible h-32 -mt-20">
-                        <GlobalPulseGlobe pulseIntensity={pulseIntensity} />
+                    <div className="absolute right-0 top-0 w-1/3 aspect-square hidden xl:block pointer-events-none">
+                        <div className="relative w-full h-full scale-[1.2] translate-x-1/4 -translate-y-1/4">
+                            <GlobalPulseGlobe pulseIntensity={pulseIntensity} />
+                        </div>
                     </div>
 
                     <div className="flex flex-wrap items-center gap-6">

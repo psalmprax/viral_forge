@@ -1,14 +1,21 @@
 import os
-import httpx
-import logging
 from typing import Optional
-from api.config import settings
+from api.utils.vault import get_secret
 
 class VoiceoverService:
+    @property
+    def elevenlabs_key(self):
+        return get_secret("elevenlabs_api_key")
+
+    @property
+    def fish_endpoint(self):
+        return get_secret("fish_speech_endpoint", "http://voiceover:8080")
+
+    @property
+    def engine(self):
+        return get_secret("voice_engine", "fish_speech")
+
     def __init__(self):
-        self.elevenlabs_key = settings.ELEVENLABS_API_KEY
-        self.fish_endpoint = settings.FISH_SPEECH_ENDPOINT
-        self.engine = settings.VOICE_ENGINE
         self.elevenlabs_url = "https://api.elevenlabs.io/v1"
         self.default_voice_id = "21m00Tcm4TlvDq8ikWAM" # Rachel
 

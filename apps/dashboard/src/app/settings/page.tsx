@@ -26,8 +26,6 @@ export default function SettingsPage() {
     const [settings, setSettings] = useState<Record<string, string>>({
         groq_api_key: "",
         youtube_api_key: "",
-        tiktok_client_id: "",
-        tiktok_client_secret: "",
         scan_frequency: "Every 1 hour",
         force_originality: "true",
         auto_pilot: "false",
@@ -43,7 +41,17 @@ export default function SettingsPage() {
         aws_region: "us-east-1",
         aws_storage_bucket_name: "",
         active_monetization_strategy: "commerce",
-        monetization_mode: "selective"
+        monetization_mode: "selective",
+        storage_provider: "OCI",
+        storage_access_key: "",
+        storage_secret_key: "",
+        storage_bucket: "",
+        storage_endpoint: "",
+        storage_region: "",
+        google_client_id: "",
+        google_client_secret: "",
+        tiktok_client_key: "",
+        tiktok_client_secret: ""
     });
     const [isLoading, setIsLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
@@ -276,6 +284,50 @@ export default function SettingsPage() {
                                                 isVisible={showKey["pexels_api_key"]}
                                                 onToggle={() => toggleKey("pexels_api_key")}
                                             />
+
+                                            <div className="pt-4 border-t border-zinc-800/50">
+                                                <label className="text-sm font-bold text-zinc-400 mb-4 block">YouTube OAuth (Google Cloud)</label>
+                                                <div className="space-y-4">
+                                                    <KeyInput
+                                                        label="Google Client ID"
+                                                        id="google_client_id"
+                                                        value={settings.google_client_id}
+                                                        onChange={(val) => updateSetting("google_client_id", val)}
+                                                        isVisible={showKey["google_client_id"]}
+                                                        onToggle={() => toggleKey("google_client_id")}
+                                                    />
+                                                    <KeyInput
+                                                        label="Google Client Secret"
+                                                        id="google_client_secret"
+                                                        value={settings.google_client_secret}
+                                                        onChange={(val) => updateSetting("google_client_secret", val)}
+                                                        isVisible={showKey["google_client_secret"]}
+                                                        onToggle={() => toggleKey("google_client_secret")}
+                                                    />
+                                                </div>
+                                            </div>
+
+                                            <div className="pt-4 border-t border-zinc-800/50">
+                                                <label className="text-sm font-bold text-zinc-400 mb-4 block">TikTok Developer Tools</label>
+                                                <div className="space-y-4">
+                                                    <KeyInput
+                                                        label="TikTok Client Key"
+                                                        id="tiktok_client_key"
+                                                        value={settings.tiktok_client_key}
+                                                        onChange={(val) => updateSetting("tiktok_client_key", val)}
+                                                        isVisible={showKey["tiktok_client_key"]}
+                                                        onToggle={() => toggleKey("tiktok_client_key")}
+                                                    />
+                                                    <KeyInput
+                                                        label="TikTok Client Secret"
+                                                        id="tiktok_client_secret"
+                                                        value={settings.tiktok_client_secret}
+                                                        onChange={(val) => updateSetting("tiktok_client_secret", val)}
+                                                        isVisible={showKey["tiktok_client_secret"]}
+                                                        onToggle={() => toggleKey("tiktok_client_secret")}
+                                                    />
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </section>
@@ -402,167 +454,252 @@ export default function SettingsPage() {
                                                 </button>
                                             </div>
                                         </div>
-                                        <div className="mb-8 p-6 bg-zinc-950/50 border border-zinc-800 rounded-2xl">
-                                            <div className="flex items-center justify-between mb-4">
-                                                <div className="space-y-1">
-                                                    <label className="text-sm font-bold text-white flex items-center gap-2">
-                                                        Monetization Mode
-                                                        <div className="group relative">
-                                                            <Shield className="h-3 w-3 text-zinc-500 cursor-help" />
-                                                            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 p-2 bg-zinc-900 border border-zinc-800 rounded-lg text-[10px] text-zinc-400 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 shadow-xl">
-                                                                Selective mode only monetizes videos that achieve a high predicted Viral Score.
+                                        <div className="space-y-6 col-span-1 md:col-span-2">
+                                            <div className="p-6 bg-zinc-950/50 border border-zinc-800 rounded-2xl">
+                                                <div className="flex items-center justify-between mb-4">
+                                                    <div className="space-y-1">
+                                                        <label className="text-sm font-bold text-white flex items-center gap-2">
+                                                            Monetization Mode
+                                                            <div className="group relative">
+                                                                <Shield className="h-3 w-3 text-zinc-500 cursor-help" />
+                                                                <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 p-2 bg-zinc-900 border border-zinc-800 rounded-lg text-[10px] text-zinc-400 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 shadow-xl">
+                                                                    Selective mode only monetizes videos that achieve a high predicted Viral Score.
+                                                                </div>
                                                             </div>
-                                                        </div>
-                                                    </label>
-                                                    <p className="text-[10px] text-zinc-600 uppercase font-black">Exposure Integrity Control</p>
-                                                </div>
+                                                        </label>
+                                                        <p className="text-[10px] text-zinc-600 uppercase font-black">Exposure Integrity Control</p>
+                                                    </div>
 
-                                                <div className="flex bg-zinc-900 p-1 rounded-xl border border-zinc-800">
-                                                    <button
-                                                        onClick={() => updateSetting("monetization_mode", "selective")}
-                                                        className={cn(
-                                                            "px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all",
-                                                            settings.monetization_mode === "selective" ? "bg-primary text-white shadow-lg shadow-primary/20" : "text-zinc-600 hover:text-zinc-400"
-                                                        )}
-                                                    >
-                                                        Selective
-                                                    </button>
-                                                    <button
-                                                        onClick={() => updateSetting("monetization_mode", "all")}
-                                                        className={cn(
-                                                            "px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all",
-                                                            settings.monetization_mode === "all" ? "bg-red-500 text-white shadow-lg shadow-red-500/20" : "text-zinc-600 hover:text-zinc-400"
-                                                        )}
-                                                    >
-                                                        All Content
-                                                    </button>
+                                                    <div className="flex bg-zinc-900 p-1 rounded-xl border border-zinc-800">
+                                                        <button
+                                                            onClick={() => updateSetting("monetization_mode", "selective")}
+                                                            className={cn(
+                                                                "px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all",
+                                                                settings.monetization_mode === "selective" ? "bg-primary text-white shadow-lg shadow-primary/20" : "text-zinc-600 hover:text-zinc-400"
+                                                            )}
+                                                        >
+                                                            Selective
+                                                        </button>
+                                                        <button
+                                                            onClick={() => updateSetting("monetization_mode", "all")}
+                                                            className={cn(
+                                                                "px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all",
+                                                                settings.monetization_mode === "all" ? "bg-red-500 text-white shadow-lg shadow-red-500/20" : "text-zinc-600 hover:text-zinc-400"
+                                                            )}
+                                                        >
+                                                            All Content
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                                <div className="h-1 w-full bg-zinc-900 rounded-full overflow-hidden">
+                                                    <div className={cn("h-full transition-all duration-500", settings.monetization_mode === "selective" ? "w-1/2 bg-primary" : "w-full bg-red-500")} />
                                                 </div>
                                             </div>
-                                            <div className="h-1 w-full bg-zinc-900 rounded-full overflow-hidden">
-                                                <div className={cn("h-full transition-all duration-500", settings.monetization_mode === "selective" ? "w-1/2 bg-primary" : "w-full bg-red-500")} />
+
+                                            <div className="space-y-4">
+                                                <div className="flex justify-between items-center">
+                                                    <label className="text-sm font-bold text-zinc-400">Monetization Strategy</label>
+                                                    <span className="text-[10px] text-zinc-500 uppercase font-black px-2 py-0.5 bg-zinc-800 rounded-full">Decoupled Scaling Mode</span>
+                                                </div>
+                                                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+                                                    {["commerce", "affiliate", "lead_gen", "digital_product"].map((strategy) => (
+                                                        <button
+                                                            key={strategy}
+                                                            onClick={() => updateSetting("active_monetization_strategy", strategy)}
+                                                            className={cn(
+                                                                "p-3 rounded-xl border text-xs font-bold transition-all capitalize",
+                                                                settings.active_monetization_strategy === strategy
+                                                                    ? "bg-primary/20 border-primary text-primary shadow-[0_0_15px_rgba(var(--primary-rgb),0.2)]"
+                                                                    : "bg-zinc-800 border-zinc-700 text-zinc-500 hover:border-zinc-600"
+                                                            )}
+                                                        >
+                                                            {strategy.replace("_", " ")}
+                                                        </button>
+                                                    ))}
+                                                </div>
+                                                <p className="text-[10px] text-zinc-600 mt-1">
+                                                    {settings.active_monetization_strategy === "commerce" && "Focuses on Shopify/Printful product integration."}
+                                                    {settings.active_monetization_strategy === "affiliate" && "Prioritizes high-commission affiliate network links."}
+                                                    {settings.active_monetization_strategy === "lead_gen" && "Builds lists via newsletter and lead magnet signups."}
+                                                    {settings.active_monetization_strategy === "digital_product" && "Scales high-margin courses, SaaS, and digital downloads."}
+                                                </p>
                                             </div>
                                         </div>
+                                    </div>
+                                </section>
 
-                                        <div className="flex justify-between items-center">
-                                            <label className="text-sm font-bold text-zinc-400">Monetization Strategy</label>
-                                            <span className="text-[10px] text-zinc-500 uppercase font-black px-2 py-0.5 bg-zinc-800 rounded-full">Decoupled Scaling Mode</span>
+                                {/* DB Status */}
+                                <div className="flex items-center justify-between p-6 bg-emerald-500/5 border border-emerald-500/10 rounded-3xl">
+                                    <div className="flex items-center gap-4">
+                                        <Database className="h-6 w-6 text-emerald-500" />
+                                        <div>
+                                            <h4 className="font-bold">PostgreSQL Persistence</h4>
+                                            <p className="text-xs text-zinc-500">Connected to db:5432 • Live Mode active</p>
                                         </div>
-                                        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-                                            {["commerce", "affiliate", "lead_gen", "digital_product"].map((strategy) => (
+                                    </div>
+                                    <CheckCircle2 className="h-6 w-6 text-emerald-500" />
+                                </div>
+                            </>
+                        ) : activeTab === "Interface" ? (
+                            <section className="space-y-6">
+                                <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-8 space-y-8">
+                                    <div className="flex items-center gap-3">
+                                        <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                                            <Layout className="h-5 w-5 text-primary" />
+                                        </div>
+                                        <div>
+                                            <h3 className="text-xl font-bold">Workspace Appearance</h3>
+                                            <p className="text-zinc-500 text-sm">Customize visual density and engine terminology.</p>
+                                        </div>
+                                    </div>
+
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                        {/* Pro Mode Toggle */}
+                                        <div className="space-y-4">
+                                            <div className="flex items-center justify-between">
+                                                <div className="space-y-1">
+                                                    <h4 className="font-bold">Pro Mode</h4>
+                                                    <p className="text-xs text-zinc-500">Cleaner, high-density interface for enterprise workflows. Removes scanlines and heavy glows.</p>
+                                                </div>
                                                 <button
-                                                    key={strategy}
-                                                    onClick={() => updateSetting("active_monetization_strategy", strategy)}
+                                                    onClick={toggleProMode}
                                                     className={cn(
-                                                        "p-3 rounded-xl border text-xs font-bold transition-all capitalize",
-                                                        settings.active_monetization_strategy === strategy
-                                                            ? "bg-primary/20 border-primary text-primary shadow-[0_0_15px_rgba(var(--primary-rgb),0.2)]"
-                                                            : "bg-zinc-800 border-zinc-700 text-zinc-500 hover:border-zinc-600"
+                                                        "w-12 h-6 rounded-full relative transition-all duration-300",
+                                                        isProMode ? "bg-primary shadow-[0_0_15px_rgba(var(--primary-rgb),0.5)]" : "bg-zinc-800"
                                                     )}
                                                 >
-                                                    {strategy.replace("_", " ")}
+                                                    <div className={cn(
+                                                        "absolute top-1 w-4 h-4 bg-white rounded-full transition-all duration-300",
+                                                        isProMode ? "right-1" : "left-1"
+                                                    )} />
                                                 </button>
-                                            ))}
+                                            </div>
                                         </div>
-                                        <p className="text-[10px] text-zinc-600 mt-1">
-                                            {settings.active_monetization_strategy === "commerce" && "Focuses on Shopify/Printful product integration."}
-                                            {settings.active_monetization_strategy === "affiliate" && "Prioritizes high-commission affiliate network links."}
-                                            {settings.active_monetization_strategy === "lead_gen" && "Builds lists via newsletter and lead magnet signups."}
-                                            {settings.active_monetization_strategy === "digital_product" && "Scales high-margin courses, SaaS, and digital downloads."}
-                                        </p>
+
+                                        {/* Accessibility / High Contrast */}
+                                        <div className="space-y-4">
+                                            <div className="flex items-center justify-between">
+                                                <div className="space-y-1">
+                                                    <h4 className="font-bold">High Contrast Borders</h4>
+                                                    <p className="text-xs text-zinc-500">Sharper distinction between cards and background for better visibility.</p>
+                                                </div>
+                                                <button
+                                                    disabled
+                                                    className="w-12 h-6 rounded-full bg-zinc-800/50 cursor-not-allowed relative"
+                                                >
+                                                    <div className="absolute top-1 left-1 w-4 h-4 bg-zinc-600 rounded-full" />
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="p-6 bg-primary/5 border border-primary/20 rounded-2xl flex items-start gap-4">
+                                        <div className="p-2 bg-primary/10 rounded-lg">
+                                            <Shield className="h-4 w-4 text-primary" />
+                                        </div>
+                                        <div className="space-y-1">
+                                            <p className="text-sm font-bold text-primary">Preview Engine Injected</p>
+                                            <p className="text-xs text-zinc-400">Settings applied globally to all `glass-card` elements using standardized spacing variables.</p>
+                                        </div>
                                     </div>
                                 </div>
                             </section>
-
-                        {/* DB Status */}
-                        <div className="flex items-center justify-between p-6 bg-emerald-500/5 border border-emerald-500/10 rounded-3xl">
-                            <div className="flex items-center gap-4">
-                                <Database className="h-6 w-6 text-emerald-500" />
-                                <div>
-                                    <h4 className="font-bold">PostgreSQL Persistence</h4>
-                                    <p className="text-xs text-zinc-500">Connected to db:5432 • Live Mode active</p>
-                                </div>
-                            </div>
-                            <CheckCircle2 className="h-6 w-6 text-emerald-500" />
-                        </div>
-                    </>
-                    ) : activeTab === "Interface" ? (
-                    <section className="space-y-6">
-                        <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-8 space-y-8">
-                            <div className="flex items-center gap-3">
-                                <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center">
-                                    <Layout className="h-5 w-5 text-primary" />
-                                </div>
-                                <div>
-                                    <h3 className="text-xl font-bold">Workspace Appearance</h3>
-                                    <p className="text-zinc-500 text-sm">Customize visual density and engine terminology.</p>
-                                </div>
-                            </div>
-
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                {/* Pro Mode Toggle */}
-                                <div className="space-y-4">
-                                    <div className="flex items-center justify-between">
-                                        <div className="space-y-1">
-                                            <h4 className="font-bold">Pro Mode</h4>
-                                            <p className="text-xs text-zinc-500">Cleaner, high-density interface for enterprise workflows. Removes scanlines and heavy glows.</p>
+                        ) : activeTab === "Infrastructure" ? (
+                            <section className="space-y-6">
+                                <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-8 space-y-8">
+                                    <div className="flex items-center gap-3">
+                                        <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                                            <Server className="h-5 w-5 text-primary" />
                                         </div>
-                                        <button
-                                            onClick={toggleProMode}
-                                            className={cn(
-                                                "w-12 h-6 rounded-full relative transition-all duration-300",
-                                                isProMode ? "bg-primary shadow-[0_0_15px_rgba(var(--primary-rgb),0.5)]" : "bg-zinc-800"
-                                            )}
-                                        >
-                                            <div className={cn(
-                                                "absolute top-1 w-4 h-4 bg-white rounded-full transition-all duration-300",
-                                                isProMode ? "right-1" : "left-1"
-                                            )} />
-                                        </button>
+                                        <div>
+                                            <h3 className="text-xl font-bold">Cloud Infrastructure</h3>
+                                            <p className="text-zinc-500 text-sm">Manage OCI Object Storage and archival parameters.</p>
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-6">
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                            <div className="space-y-2">
+                                                <label className="text-sm font-bold text-zinc-400">Storage Provider</label>
+                                                <select
+                                                    value={settings.storage_provider}
+                                                    onChange={(e) => updateSetting("storage_provider", e.target.value)}
+                                                    className="w-full bg-zinc-950/50 border border-white/10 rounded-xl p-3 text-white focus:ring-2 ring-primary/50 outline-none text-xs font-bold uppercase tracking-wider cursor-pointer"
+                                                >
+                                                    <option value="LOCAL">Local Disk (No Archival)</option>
+                                                    <option value="OCI">Oracle Cloud Infrastructure (OCI)</option>
+                                                    <option value="AWS">AWS S3</option>
+                                                </select>
+                                            </div>
+                                            <div className="space-y-2">
+                                                <label className="text-sm font-bold text-zinc-400">Region</label>
+                                                <input
+                                                    type="text"
+                                                    value={settings.storage_region}
+                                                    onChange={(e) => updateSetting("storage_region", e.target.value)}
+                                                    className="w-full bg-zinc-950/50 border border-white/10 rounded-xl py-2 px-3 text-sm text-zinc-300"
+                                                    placeholder="eu-frankfurt-1"
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <div className="space-y-2">
+                                            <label className="text-sm font-bold text-zinc-400">Storage Endpoint</label>
+                                            <input
+                                                type="text"
+                                                value={settings.storage_endpoint}
+                                                onChange={(e) => updateSetting("storage_endpoint", e.target.value)}
+                                                className="w-full bg-zinc-950/50 border border-white/10 rounded-xl py-2 px-3 text-sm text-zinc-300 font-mono"
+                                                placeholder="https://<namespace>.compat.objectstorage.eu-frankfurt-1.oraclecloud.com"
+                                            />
+                                        </div>
+
+                                        <div className="space-y-2">
+                                            <label className="text-sm font-bold text-zinc-400">Bucket Name</label>
+                                            <input
+                                                type="text"
+                                                value={settings.storage_bucket}
+                                                onChange={(e) => updateSetting("storage_bucket", e.target.value)}
+                                                className="w-full bg-zinc-950/50 border border-white/10 rounded-xl py-2 px-3 text-sm text-zinc-300"
+                                                placeholder="viral-forge-assets"
+                                            />
+                                        </div>
+
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-zinc-800/50">
+                                            <KeyInput
+                                                label="Access Key ID"
+                                                id="storage_access_key"
+                                                value={settings.storage_access_key}
+                                                onChange={(val) => updateSetting("storage_access_key", val)}
+                                                isVisible={showKey["storage_access_key"]}
+                                                onToggle={() => toggleKey("storage_access_key")}
+                                            />
+                                            <KeyInput
+                                                label="Secret Access Key"
+                                                id="storage_secret_key"
+                                                value={settings.storage_secret_key}
+                                                onChange={(val) => updateSetting("storage_secret_key", val)}
+                                                isVisible={showKey["storage_secret_key"]}
+                                                onToggle={() => toggleKey("storage_secret_key")}
+                                            />
+                                        </div>
                                     </div>
                                 </div>
-
-                                {/* Accessibility / High Contrast */}
-                                <div className="space-y-4">
-                                    <div className="flex items-center justify-between">
-                                        <div className="space-y-1">
-                                            <h4 className="font-bold">High Contrast Borders</h4>
-                                            <p className="text-xs text-zinc-500">Sharper distinction between cards and background for better visibility.</p>
-                                        </div>
-                                        <button
-                                            disabled
-                                            className="w-12 h-6 rounded-full bg-zinc-800/50 cursor-not-allowed relative"
-                                        >
-                                            <div className="absolute top-1 left-1 w-4 h-4 bg-zinc-600 rounded-full" />
-                                        </button>
-                                    </div>
+                            </section>
+                        ) : (
+                            <div className="bg-zinc-900/50 border border-zinc-800 rounded-3xl p-12 text-center space-y-4">
+                                <div className="h-16 w-16 rounded-2xl bg-zinc-800 flex items-center justify-center mx-auto">
+                                    <Server className="h-8 w-8 text-zinc-600" />
                                 </div>
+                                <h3 className="text-xl font-bold text-zinc-400">{activeTab} Configuration</h3>
+                                <p className="text-zinc-500 max-w-sm mx-auto">
+                                    Direct access to {activeTab.toLowerCase()} parameters is coming soon. ViralForge is currently using optimized default parameters for high-velocity distribution.
+                                </p>
                             </div>
-
-                            <div className="p-6 bg-primary/5 border border-primary/20 rounded-2xl flex items-start gap-4">
-                                <div className="p-2 bg-primary/10 rounded-lg">
-                                    <Shield className="h-4 w-4 text-primary" />
-                                </div>
-                                <div className="space-y-1">
-                                    <p className="text-sm font-bold text-primary">Preview Engine Injected</p>
-                                    <p className="text-xs text-zinc-400">Settings applied globally to all `glass-card` elements using standardized spacing variables.</p>
-                                </div>
-                            </div>
-                        </div>
-                    </section>
-                    ) : (
-                    <div className="bg-zinc-900/50 border border-zinc-800 rounded-3xl p-12 text-center space-y-4">
-                        <div className="h-16 w-16 rounded-2xl bg-zinc-800 flex items-center justify-center mx-auto">
-                            <Server className="h-8 w-8 text-zinc-600" />
-                        </div>
-                        <h3 className="text-xl font-bold text-zinc-400">{activeTab} Configuration</h3>
-                        <p className="text-zinc-500 max-w-sm mx-auto">
-                            Direct access to {activeTab.toLowerCase()} parameters is coming soon. ViralForge is currently using optimized default parameters for high-velocity distribution.
-                        </p>
-                    </div>
                         )}
+                    </div>
                 </div>
             </div>
-        </div>
         </DashboardLayout >
     );
 }

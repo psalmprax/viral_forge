@@ -55,6 +55,9 @@ class NexusOrchestrator:
             # 5. Combine and Render
             final_video = final_visuals.with_audio(final_audio)
             
+            from api.routes.ws import notify_nexus_job_update_sync
+            notify_nexus_job_update_sync({"id": str(job_id), "status": "RENDERING", "progress": 60, "niche": niche})
+
             output_filename = f"nexus_{job_id}_{niche.replace(' ', '_')}.mp4"
             output_path = os.path.join(self.output_dir, output_filename)
             
@@ -66,6 +69,8 @@ class NexusOrchestrator:
                 audio_codec="aac"
             )
             
+            notify_nexus_job_update_sync({"id": str(job_id), "status": "COMPLETED", "progress": 95, "niche": niche})
+
             return output_path
         except Exception as e:
             logging.error(f"[Nexus] Assembly Failed for Job {job_id}: {e}")

@@ -26,6 +26,7 @@ import dynamic from "next/dynamic";
 import * as d3 from "d3";
 import { useWebSocket } from "@/hooks/useWebSocket";
 import { useRouter } from "next/navigation";
+import { VideoPreviewModal } from "@/components/ui/VideoPreviewModal";
 
 const Geomap = dynamic(() => import("@/components/ui/Geomap"), { ssr: false });
 const NetworkMesh = dynamic(() => import("@/components/ui/NetworkMesh"), { ssr: false });
@@ -64,7 +65,16 @@ export default function DiscoveryPage() {
     const [minViralScore, setMinViralScore] = useState(75);
     const [excludeShorts, setExcludeShorts] = useState(false);
 
-    const niches = ["Motivation", "AI Technology", "Finance", "Health", "Gaming", "Crypto", "Relationships"];
+    // Test Drive State
+    const [isTestDriving, setIsTestDriving] = useState(false);
+    const [testJobId, setTestJobId] = useState<string | null>(null);
+    const [showPreview, setShowPreview] = useState(false);
+    const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+    const [previewTitle, setPreviewTitle] = useState("");
+
+    const niches = ["Motivation", "AI Technology", "Finance", "Health", "Gaming", "Crypto", "Relationships", "Music", "Children", "Storytelling", "True Crime", "Science", "Luxury"];
+    const styles = ["Default", "Cinematic", "Hectic/Viral", "ASMR/Calm", "Educational", "Dramatic"];
+    const [selectedStyle, setSelectedStyle] = useState("Default");
 
     useEffect(() => {
         fetchTrends();
@@ -112,7 +122,8 @@ export default function DiscoveryPage() {
                 body: JSON.stringify({
                     input_url: candidate.url,
                     niche: activeNiche,
-                    platform: "YouTube Shorts"
+                    platform: "YouTube Shorts",
+                    style: selectedStyle
                 })
             });
             if (res.ok) {
@@ -122,6 +133,36 @@ export default function DiscoveryPage() {
             console.error(err);
         }
     }, [activeNiche, router]);
+
+    const handleTestDrive = useCallback(async () => {
+        setIsTestDriving(true);
+        try {
+            const token = localStorage.getItem("vf_token");
+            const res = await fetch(`${API_BASE}/video/test-drive`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    niche: activeNiche,
+                    style: selectedStyle
+                })
+            });
+            if (res.ok) {
+                const data = await res.json();
+                setTestJobId(data.task_id);
+                setPreviewTitle(`Test Drive Outcome: ${activeNiche}`);
+                alert(`Test Drive Initiated for ${activeNiche}. System is finding and transforming the top viral candidate...`);
+            } else {
+                alert("Failed to start test drive. Ensure discovery has data for this niche.");
+                setIsTestDriving(false);
+            }
+        } catch (err) {
+            console.error(err);
+            setIsTestDriving(false);
+        }
+    }, [activeNiche]);
 
     const filteredCandidates = React.useMemo(() => {
         if (!Array.isArray(candidates)) return [];
@@ -182,6 +223,19 @@ export default function DiscoveryPage() {
                         return newPoints.slice(-15); // Keep last 15 active pulses
                     });
                 }
+
+                if (data.type === "job_update" && data.data && data.data.id === testJobId) {
+                    if (data.data.status === "Completed" && data.data.output_path) {
+                        setPreviewUrl(data.data.output_path);
+                        setShowPreview(true);
+                        setIsTestDriving(false);
+                        setTestJobId(null);
+                    } else if (data.data.status === "Failed") {
+                        alert("Test Drive Failed. Check logs for details.");
+                        setIsTestDriving(false);
+                        setTestJobId(null);
+                    }
+                }
             } catch (e) {
                 console.error("Error processing telemetry for map:", e);
             }
@@ -209,19 +263,52 @@ export default function DiscoveryPage() {
                     </div>
 
                     <div className="flex items-center gap-4">
-                        <form onSubmit={handleSearch} className="relative group">
-                            <input
-                                id="neural-search"
-                                name="neural-search"
-                                type="text"
-                                placeholder="Neural Search..."
-                                aria-label="Search for viral content"
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                                className="bg-zinc-950/50 backdrop-blur-md border border-white/10 rounded-2xl py-3 pl-12 pr-6 text-sm font-bold text-white focus:outline-none focus:border-primary/50 transition-all w-80 group-hover:border-white/20"
-                            />
-                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500 group-hover:text-primary transition-colors" />
+                        <form onSubmit={handleSearch} className="relative group flex items-center gap-2">
+                            <div className="relative">
+                                <input
+                                    id="neural-search"
+                                    name="neural-search"
+                                    type="text"
+                                    placeholder="Niche Search (e.g. True Crime)..."
+                                    aria-label="Search for viral content"
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    className="bg-zinc-950/50 backdrop-blur-md border border-white/10 rounded-2xl py-3 pl-12 pr-6 text-sm font-bold text-white focus:outline-none focus:border-primary/50 transition-all w-80 group-hover:border-white/20"
+                                />
+                                <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500 group-hover:text-primary transition-colors" />
+                            </div>
+                            {searchQuery && (
+                                <motion.button
+                                    initial={{ opacity: 0, x: -10 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    type="button"
+                                    onClick={async () => {
+                                        const token = localStorage.getItem("vf_token");
+                                        setIsLoading(true);
+                                        await fetch(`${API_BASE}/discovery/scan`, {
+                                            method: "POST",
+                                            headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+                                            body: JSON.stringify({ niches: [searchQuery] })
+                                        });
+                                        fetchTrends();
+                                    }}
+                                    className="px-4 py-3 rounded-2xl bg-primary/20 border border-primary/30 text-[10px] font-black uppercase tracking-widest text-primary hover:bg-primary hover:text-black transition-all"
+                                >
+                                    Deep Scan
+                                </motion.button>
+                            )}
                         </form>
+                        <button
+                            onClick={handleTestDrive}
+                            disabled={isTestDriving}
+                            className={cn(
+                                "flex items-center gap-2 px-6 py-3 rounded-2xl bg-zinc-950/80 border border-primary/20 text-xs font-black uppercase tracking-widest transition-all hover:bg-primary hover:text-black",
+                                isTestDriving && "opacity-50 cursor-not-allowed"
+                            )}
+                        >
+                            {isTestDriving ? <Loader2 className="h-4 w-4 animate-spin text-primary" /> : <Zap className="h-4 w-4 text-primary" />}
+                            Test Drive
+                        </button>
                         <button
                             onClick={fetchTrends}
                             className="p-3 rounded-2xl bg-zinc-900 border border-white/5 text-zinc-400 hover:text-white transition-all"
@@ -348,6 +435,28 @@ export default function DiscoveryPage() {
                                         />
                                         <span className="text-xl font-black text-primary">{minViralScore}</span>
                                     </div>
+                                </div>
+                                <div className="space-y-4">
+                                    <label className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Creative Style Overlay</label>
+                                    <div className="flex flex-wrap gap-2">
+                                        {styles.map((s) => (
+                                            <button
+                                                key={s}
+                                                onClick={() => setSelectedStyle(s)}
+                                                className={cn(
+                                                    "px-3 py-2 rounded-lg text-[10px] font-black uppercase tracking-tighter transition-all border",
+                                                    selectedStyle === s
+                                                        ? "bg-primary text-black border-white shadow-[0_0_15px_rgba(var(--primary-rgb),0.3)]"
+                                                        : "bg-zinc-950 border-zinc-800 text-zinc-500 hover:text-white hover:border-zinc-600"
+                                                )}
+                                            >
+                                                {s}
+                                            </button>
+                                        ))}
+                                    </div>
+                                    <p className="text-[8px] font-bold text-zinc-600 uppercase tracking-widest leading-relaxed">
+                                        Forces AI Decision Engine to prioritize <span className="text-zinc-400 italic">"{selectedStyle}"</span> pacing and filters.
+                                    </p>
                                 </div>
                                 <div className="space-y-4">
                                     <label className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Format Filters</label>
@@ -568,6 +677,13 @@ export default function DiscoveryPage() {
                     </div>
                 </div>
             </div>
+
+            <VideoPreviewModal
+                isOpen={showPreview}
+                onClose={() => setShowPreview(false)}
+                videoUrl={previewUrl}
+                title={previewTitle}
+            />
         </DashboardLayout>
     );
 }
