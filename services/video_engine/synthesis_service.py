@@ -19,6 +19,8 @@ class GenerativeService:
             return await self._synthesize_veo3(prompt, aspect_ratio)
         elif engine == "wan2.2":
             return await self._synthesize_wan(prompt, aspect_ratio)
+        elif engine == "ltx2":
+            return await self._synthesize_ltx2(prompt, aspect_ratio)
         else:
             logging.error(f"[GenerativeService] Unsupported engine: {engine}")
             return None
@@ -45,6 +47,15 @@ class GenerativeService:
 
         # Interface with SiliconFlow/Open-Source cloud provider
         return "https://storage.googleapis.com/viral-forge-assets/mocks/wan22_generated.mp4"
+
+    async def _synthesize_ltx2(self, prompt: str, aspect_ratio: str) -> Optional[str]:
+        """
+        LTX-2 (by Lightricks) Integration — Roadmap Item.
+        High-fidelity native 4K output.
+        """
+        logging.info("[GenerativeService] LTX-2 Synthesis requested (Roadmap).")
+        # In the future, this would call Fal.ai or a local LTX-2 worker
+        return "https://storage.googleapis.com/viral-forge-assets/mocks/ltx2_roadmap_preview.mp4"
 
     def optimize_prompt(self, user_prompt: str, style: str = "Cinematic") -> str:
         """

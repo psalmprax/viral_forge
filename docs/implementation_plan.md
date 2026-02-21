@@ -196,6 +196,7 @@ Integrate **Fish Speech** (Open Source weights) as a containerized service.
 ### Component 12: Generative Dreamscapes (Phase 22)
 - **Synthesis Orchestration**: Implementation of [**`GenerativeService`**](file:///home/psalmprax/viral_forge/services/video_engine/synthesis_service.py) for text-to-video synthesis.
 - **Dual-Engine Support**: Integration with **Google Veo 3** (High-Tier) and **Wan2.2** (Open-Source) via SiliconFlow/Fal.ai.
+- **LTX-2 Integration**: Planned support for **LTX-2 (by Lightricks)** as a production-ready, native 4K open-source alternative.
 - **Prompt Director**: Intelligent LLM-driven prompt expansion for high-artistry video outcomes.
 - **Synthesis UI**: Interactive dashboard mode for prompt-to-viral content generation.
 

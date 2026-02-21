@@ -791,6 +791,17 @@ export default function DiscoveryPage() {
                                                 <h4 className="text-lg font-black text-white uppercase italic">Wan-AI 2.2</h4>
                                                 <p className="text-[10px] font-medium text-zinc-500 mt-2 uppercase">High-Fidelity MoE Architecture</p>
                                             </button>
+                                            <button
+                                                disabled
+                                                className="p-6 rounded-3xl border border-white/5 bg-black/20 text-left transition-all opacity-60 cursor-not-allowed grayscale"
+                                            >
+                                                <div className="flex items-center justify-between mb-4">
+                                                    <span className="text-[10px] font-black uppercase tracking-widest text-primary/50">Roadmap Node</span>
+                                                    <Calendar className="h-4 w-4 text-zinc-700" />
+                                                </div>
+                                                <h4 className="text-lg font-black text-zinc-400 uppercase italic">LTX-2 (Lightricks)</h4>
+                                                <p className="text-[10px] font-medium text-zinc-600 mt-2 uppercase">Native 4K Cinematic Generation</p>
+                                            </button>
                                         </div>
 
                                         <div className="space-y-4">
@@ -816,13 +827,15 @@ export default function DiscoveryPage() {
                             )}
                         </div>
                     </div>
+                </div>
+            </div>
 
-                    <VideoPreviewModal
-                        isOpen={showPreview}
-                        onClose={() => setShowPreview(false)}
-                        videoUrl={previewUrl}
-                        title={previewTitle}
-                    />
-                </DashboardLayout>
-                );
+            <VideoPreviewModal
+                isOpen={showPreview}
+                onClose={() => setShowPreview(false)}
+                videoUrl={previewUrl}
+                title={previewTitle}
+            />
+        </DashboardLayout>
+    );
 }
