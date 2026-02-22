@@ -27,6 +27,10 @@ class UserUpdate(BaseModel):
     telegram_chat_id: Optional[str] = None
     telegram_token: Optional[str] = None
 
+class PasswordChange(BaseModel):
+    current_password: str
+    new_password: str
+
 class UserResponse(BaseModel):
     username: str
     email: str
@@ -122,6 +126,28 @@ async def update_me(user_update: UserUpdate, current_user: UserDB = Depends(get_
     db.commit()
     db.refresh(current_user)
     return current_user
+
+@router.post("/me/change-password")
+async def change_password(password_change: PasswordChange, current_user: UserDB = Depends(get_current_user), db: Session = Depends(get_db)):
+    """Change user password"""
+    if not verify_password(password_change.current_password, current_user.hashed_password):
+        raise HTTPException(status_code=400, detail="Current password is incorrect")
+    
+    current_user.hashed_password = get_password_hash(password_change.new_password)
+    db.commit()
+    return {"message": "Password changed successfully"}
+
+@router.post("/me/upgrade-subscription")
+async def upgrade_subscription(tier: str, current_user: UserDB = Depends(get_current_user), db: Session = Depends(get_db)):
+    """Upgrade user subscription tier"""
+    valid_tiers = ["free", "basic", "premium"]
+    if tier.lower() not in valid_tiers:
+        raise HTTPException(status_code=400, detail=f"Invalid tier. Must be one of: {', '.join(valid_tiers)}")
+    
+    current_user.subscription = tier.lower()
+    db.commit()
+    db.refresh(current_user)
+    return {"message": f"Subscription upgraded to {tier}", "subscription": current_user.subscription}
 
 @router.get("/verify-telegram/{telegram_id}", response_model=UserResponse)
 async def verify_telegram(telegram_id: str, db: Session = Depends(get_db)):

@@ -64,10 +64,11 @@ class MembershipStrategy(BaseMonetizationStrategy):
         """
         assets = await self.get_assets(niche)
         
-        if assets:
-            platform_url = assets[0].get("url", "https://patreon.com/ettametta")
-        else:
-            platform_url = "https://patreon.com/ettametta"
+        if not assets:
+            logging.warning(f"[MembershipStrategy] No membership platform configured. Set 'membership_platform_url' in settings.")
+            return ""
+        
+        platform_url = assets[0].get("url", "")
         
         options = [
             f"Support my work! Join the inner circle: \n🔗 {platform_url}",

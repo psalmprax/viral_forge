@@ -62,7 +62,7 @@ async def get_settings(db: Session = Depends(get_db), _admin = Depends(admin_req
         "monetization_mode": "selective",
         "membership_platform_url": "",
         "course_platform_url": "",
-        "sponsorship_contact": "sponsors@ettametta.ai",
+        "sponsorship_contact": "",
         "brand_partners": "",
         "crypto_wallets": "",
         "donation_link": ""

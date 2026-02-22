@@ -25,29 +25,70 @@ async def list_analytics_posts(current_user: UserDB = Depends(get_current_user))
 
 @router.get("/report/{post_id}", response_model=ContentPerformance)
 async def get_report(post_id: str, current_user: UserDB = Depends(get_current_user)):
+    from api.utils.database import SessionLocal
+    from api.utils.models import PublishedContentDB
+    db = SessionLocal()
     try:
+        # Verify user owns this content
+        content = db.query(PublishedContentDB).filter(PublishedContentDB.id == post_id).first()
+        if not content:
+            raise HTTPException(status_code=404, detail="Content not found")
+        if content.user_id != current_user.id and current_user.role != "admin":
+            raise HTTPException(status_code=403, detail="Access denied")
+        
         report = await base_analytics_service.get_performance_report(post_id)
-        # In a real app, verify report.user_id == current_user.id
         return report
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        db.close()
 
 @router.get("/insights/{post_id}")
 async def get_insights(post_id: str, current_user: UserDB = Depends(get_current_user)):
+    from api.utils.database import SessionLocal
+    from api.utils.models import PublishedContentDB
+    db = SessionLocal()
     try:
+        # Verify user owns this content
+        content = db.query(PublishedContentDB).filter(PublishedContentDB.id == post_id).first()
+        if not content:
+            raise HTTPException(status_code=404, detail="Content not found")
+        if content.user_id != current_user.id and current_user.role != "admin":
+            raise HTTPException(status_code=403, detail="Access denied")
+        
         report = await base_analytics_service.get_performance_report(post_id)
         return {"insight": report.optimization_insight}
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        db.close()
 
 @router.get("/monetization/{post_id}")
 async def get_monetization_suggestions(post_id: str, niche: str = "Motivation", current_user: UserDB = Depends(get_current_user)):
+    from api.utils.database import SessionLocal
+    from api.utils.models import PublishedContentDB
+    db = SessionLocal()
     try:
+        # Verify user owns this content
+        content = db.query(PublishedContentDB).filter(PublishedContentDB.id == post_id).first()
+        if not content:
+            raise HTTPException(status_code=404, detail="Content not found")
+        if content.user_id != current_user.id and current_user.role != "admin":
+            raise HTTPException(status_code=403, detail="Access denied")
+        
         report = await base_analytics_service.get_performance_report(post_id)
         suggestions = base_analytics_service.suggest_optimal_monetization(report, niche)
         return {"report": report, "suggestions": suggestions}
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        db.close()
 
 @router.get("/stats/summary")
 async def get_stats_summary(current_user: UserDB = Depends(get_current_user)):

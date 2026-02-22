@@ -116,7 +116,10 @@ class CryptoStrategy(BaseMonetizationStrategy):
                 ]
             else:
                 # Donation link
-                url = crypto_asset.get("url", "https://donate.ettametta.ai")
+                url = crypto_asset.get("url", "")
+                if not url:
+                    logging.warning(f"[CryptoStrategy] No donation URL configured for niche: {niche}")
+                    return ""
                 options = [
                     f"Enjoyed this? Support us here: \n🔗 {url}",
                     f"Help keep this channel going! Donate: \n🔗 {url}",

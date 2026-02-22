@@ -98,16 +98,17 @@ class OptimizationService:
             db.close()
 
     def _get_fallback_package(self, niche, platform, product=None):
-        description = f"Level up your {niche} game with this unique strategy."
+        # Return minimal/empty package when API key is not configured
+        description = f"Generate content for your {niche} niche."
         if product:
             description += f" \n\n{product.cta_text}: {product.link}"
         
         return PostMetadata(
-            title=f"Viral {niche} Insight",
+            title=f"{niche} Content",
             description=description,
-            hashtags=["Viral", niche.replace(" ", "")],
+            hashtags=[niche.replace(" ", "")],
             cta="Subscribe for more!",
-            best_posting_time="Now",
+            best_posting_time="Configure API to enable",
             platform=platform
         )
 

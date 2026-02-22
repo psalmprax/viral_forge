@@ -30,13 +30,13 @@ class AffiliateStrategy(BaseMonetizationStrategy):
         links = await self.get_assets(niche)
         
         # Pick one at random if multiple exist
-        if links:
-            chosen_link = random.choice(links)
-            product_url = chosen_link.get("url", "")
-            product_name = chosen_link.get("name", "gear")
-        else:
-            product_url = "https://linkin.bio/ettametta"
-            product_name = "gear"
+        if not links:
+            logging.warning(f"[AffiliateStrategy] No affiliate links found for niche: {niche}. Configure links in the database.")
+            return ""
+        
+        chosen_link = random.choice(links)
+        product_url = chosen_link.get("url", "")
+        product_name = chosen_link.get("name", "gear")
 
         options = [
             f"Check the link in bio for the best {product_name} deal! \n🔗 {product_url}",

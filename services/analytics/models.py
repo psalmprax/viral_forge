@@ -11,6 +11,6 @@ class ContentPerformance(BaseModel):
     shares: int
     comments: int
     follows_gained: int
-    retention_data: List[int] = [40, 65, 45, 90, 75, 55, 85, 30, 95, 70, 60, 80]
+    retention_data: List[int] = []
     optimization_insight: Optional[str] = None
     timestamp: datetime = datetime.utcnow()

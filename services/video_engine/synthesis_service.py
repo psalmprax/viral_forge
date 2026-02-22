@@ -1,6 +1,6 @@
 import logging
 import json
-from typing import Optional, Dict
+from typing import Optional, Dict, List
 from api.utils.vault import get_secret
 import httpx
 
@@ -82,23 +82,24 @@ class GenerativeService:
         Google Veo 3 (Gemini 1.5/Veo API) Integration.
         """
         if not self.gemini_api_key:
-            logging.warning("[GenerativeService] Gemini API key missing. Mocking Veo 3 output.")
-            return "https://storage.googleapis.com/viral-forge-assets/mocks/veo3_sample.mp4"
+            logging.error("[GenerativeService] Gemini API key missing. Cannot generate video.")
+            raise ValueError("Google Gemini API key not configured. Please set GEMINI_API_KEY in environment.")
 
         # Actual API call logic for Google Veo 3 would go here
-        # For now, we simulate the request flow
-        return "https://storage.googleapis.com/viral-forge-assets/mocks/veo3_generated.mp4"
+        # TODO: Implement actual API call when API is available
+        raise NotImplementedError("Veo 3 synthesis not yet implemented. API integration pending.")
 
     async def _synthesize_wan(self, prompt: str, aspect_ratio: str) -> Optional[str]:
         """
         Open-Source Synthesis (Wan2.2 via SiliconFlow/Fal.ai).
         """
         if not self.silicon_flow_key:
-            logging.warning("[GenerativeService] SiliconFlow API key missing. Mocking Wan2.2 output.")
-            return "https://storage.googleapis.com/viral-forge-assets/mocks/wan22_sample.mp4"
+            logging.error("[GenerativeService] SiliconFlow API key missing. Cannot generate video.")
+            raise ValueError("SiliconFlow API key not configured. Please set SILICON_FLOW_API_KEY in environment.")
 
         # Interface with SiliconFlow/Open-Source cloud provider
-        return "https://storage.googleapis.com/viral-forge-assets/mocks/wan22_generated.mp4"
+        # TODO: Implement actual API call when API is available
+        raise NotImplementedError("Wan2.2 synthesis not yet implemented. API integration pending.")
 
     async def _synthesize_local(self, prompt: str, aspect_ratio: str) -> Optional[str]:
         """
@@ -134,9 +135,10 @@ class GenerativeService:
                 logging.error(f"[GenerativeService] Failed to contact Remote GPU Node: {e}")
                 # Fallback to mock
         else:
-            logging.warning("[GenerativeService] RENDER_NODE_URL not configured. Returning mock for local integration testing.")
-            
-        return "https://storage.googleapis.com/viral-forge-assets/mocks/local_ltx_video_preview.mp4"
+            logging.error("[GenerativeService] RENDER_NODE_URL not configured. Cannot generate video.")
+            raise ValueError("Render node URL not configured. Please set RENDER_NODE_URL in environment.")
+        
+        return None
 
     def optimize_prompt(self, user_prompt: str, style: str = "Cinematic") -> str:
         """

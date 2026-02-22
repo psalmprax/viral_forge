@@ -134,21 +134,7 @@ class YouTubeShortsScanner(TrendScanner):
         return candidate.view_count / max(hours_since, 1)
 
     def _get_mock_data(self, niche: str) -> List[ContentCandidate]:
-        return [
-            ContentCandidate(
-                id=f"yt_mock_{i}",
-                platform="YouTube Shorts",
-                url=f"http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
-                author=f"Creator_{i}",
-                title=f"The Future of AI in {niche}",
-                view_count=random.randint(50000, 1000000),
-                engagement_rate=random.uniform(0.05, 0.15),
-                views=random.randint(50000, 1000000),
-                engagement_score=random.uniform(0.05, 0.15),
-                viral_score=random.randint(40, 95),
-                duration_seconds=float(random.randint(15, 60)),
-                tags=["AI", niche, "Tech", "Viral"],
-                thumbnail_url=f"http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/images/ForBiggerBlazes.jpg"
-            )
-            for i in range(3)
-        ]
+        """
+        DEPRECATED: Returns empty list. Do not generate fake data.
+        """
+        return []

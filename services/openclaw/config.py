@@ -14,6 +14,7 @@ class Settings(BaseSettings):
     
     # ettametta Internal APIs
     API_URL: str = "http://api:8000"
+    INTERNAL_API_TOKEN: str = ""  # Token for internal service-to-service auth
     
     # Service Config
     PORT: int = 3001

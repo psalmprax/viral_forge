@@ -43,14 +43,8 @@ class AutoMerchService:
         if product_data:
             logger.info(f"[AutoMerch] Successfully published product: {product_data.get('url')}")
         else:
-            logger.warning("[AutoMerch] Failed to publish product. Returning mock data.")
-            product_data = {
-                "id": str(uuid.uuid4()),
-                "name": product_title,
-                "url": "https://linkin.bio/ettametta", # Fallback
-                "price": "$24.99",
-                "source": "auto_merch_mock"
-            }
+            logger.error("[AutoMerch] Failed to publish product. Auto-merch requires Printify/Shopify integration.")
+            raise RuntimeError("Auto-merch publishing failed. Please configure Printify/Shopify API credentials.")
             
         return product_data
 
@@ -92,23 +86,11 @@ class AutoMerchService:
         """
         # In a real implementation:
         # 1. Download image
-        # 2. POST to Printful/Printify API to create a product mockup
-        # 3. POST to Shopify Admin API to create the listing
+        # TODO: Implement actual POD API integration
+        # 1. POST to Printful/Printify API to create a product mockup
+        # 2. POST to Shopify Admin API to create the listing
         
-        logger.info(f"[AutoMerch] Simulating POD publishing for design: {image_url}")
-        
-        # Simulated delay
-        import asyncio
-        await asyncio.sleep(2)
-        
-        # Return mocked product data that mimics what Shopify would return
-        return {
-            "id": f"pod_{random.randint(1000, 9999)}",
-            "name": title,
-            "url": "https://linkin.bio/ettametta", # Mock storefront link
-            "image_url": image_url,
-            "price": "$24.99",
-            "source": "auto_merch"
-        }
+        logger.error("[AutoMerch] POD publishing not implemented. Please configure Printify/Shopify API credentials.")
+        raise NotImplementedError("Auto-merch POD publishing requires Printify/Shopify API integration.")
 
 auto_merch_service = AutoMerchService()

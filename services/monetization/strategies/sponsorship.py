@@ -22,7 +22,7 @@ class SponsorshipStrategy(BaseMonetizationStrategy):
                 SystemSettings.key == "sponsorship_contact"
             ).first()
             
-            contact_email = setting.value if setting else "sponsors@ettametta.ai"
+            contact_email = setting.value if setting else ""
             
             # Check for brand partners
             brands_setting = db.query(SystemSettings).filter(

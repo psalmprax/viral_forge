@@ -26,6 +26,6 @@ class ThumbnailGenerator:
             return image_url
         except Exception as e:
             logging.error(f"[Thumbnail] Generation Failed: {e}")
-            return "https://via.placeholder.com/1280x720?text=Thumbnail+Generation+Failed"
+            raise RuntimeError(f"Thumbnail generation failed: {e}")
 
 base_thumbnail_generator = ThumbnailGenerator()

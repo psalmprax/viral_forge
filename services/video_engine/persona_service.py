@@ -18,8 +18,8 @@ class PersonaService:
         logger.info(f"Animating Persona. Image: {reference_image_url} | Topic: {topic}")
         
         if not self.render_node_url:
-            logger.warning("RENDER_NODE_URL missing. Using fallback mock persona.")
-            return "https://storage.googleapis.com/viral-forge-assets/mocks/persona_fallback.mp4"
+            logger.error("RENDER_NODE_URL missing. Cannot animate persona.")
+            raise ValueError("Render node URL not configured. Please set RENDER_NODE_URL in environment.")
             
         try:
             # We would typically call XTTS or ElevenLabs here to generate the speech first.
@@ -38,10 +38,10 @@ class PersonaService:
                 return f"{self.render_node_url}/download/{data.get('job_id')}"
             else:
                 logger.error(f"Render node failed: {response.text}")
-                return "https://storage.googleapis.com/viral-forge-assets/mocks/persona_fallback_error.mp4"
+                raise RuntimeError(f"Render node returned error: {response.status_code}")
                 
         except Exception as e:
             logger.error(f"Error connecting to render node for persona: {e}")
-            return "https://storage.googleapis.com/viral-forge-assets/mocks/persona_fallback.mp4"
+            raise RuntimeError(f"Failed to connect to render node: {e}")
 
 persona_service = PersonaService()

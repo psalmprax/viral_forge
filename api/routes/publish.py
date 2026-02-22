@@ -15,6 +15,7 @@ from api.utils.user_models import UserDB
 from api.utils.database import SessionLocal
 from api.utils.models import SocialAccount, PublishedContentDB
 import datetime
+import uuid
 
 router = APIRouter(prefix="/publish", tags=["Publishing"])
 
@@ -200,7 +201,9 @@ class PublishRequest(BaseModel):
 @router.post("/package")
 async def generate_package(niche: str, platform: str = "YouTube Shorts"):
     try:
-        package = await base_optimization_service.generate_viral_package("dummy_id", niche, platform)
+        # Generate a UUID for the content ID since no user is authenticated
+        content_id = str(uuid.uuid4())
+        package = await base_optimization_service.generate_viral_package(content_id, niche, platform)
         return package
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -227,8 +230,9 @@ async def schedule_post(request: PublishRequest, scheduled_time: datetime.dateti
     from api.utils.models import ScheduledPostDB
     db = SessionLocal()
     try:
-        # Re-use viral package generation for consistency
-        metadata = await base_optimization_service.generate_viral_package("dummy_id", request.niche, request.platform)
+        # Generate metadata for the scheduled post
+        content_id = str(uuid.uuid4())
+        metadata = await base_optimization_service.generate_viral_package(content_id, request.niche, request.platform)
         
         new_schedule = ScheduledPostDB(
             video_path=request.video_path,
@@ -254,7 +258,8 @@ async def publish_video(request: PublishRequest, current_user: UserDB = Depends(
     db = SessionLocal()
     try:
         # 1. Generate SEO package
-        metadata = await base_optimization_service.generate_viral_package("dummy_id", request.niche, request.platform)
+        content_id = str(uuid.uuid4())
+        metadata = await base_optimization_service.generate_viral_package(content_id, request.niche, request.platform)
         
         # 2. Affiliate Injection
         if request.inject_monetization:

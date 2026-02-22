@@ -116,20 +116,20 @@ class AnalyticsService:
             except Exception as e:
                 logging.error(f"Failed to fetch YouTube analytics: {e}")
         
-        # Fallback Mock Data
+        # Fallback to zero/empty data (no mock data)
         mock_result = ContentPerformance(
             post_id=post_id,
-            views=125000,
-            watch_time=450.5,
-            retention_rate=0.72,
-            likes=8400,
-            shares=1200,
-            follows_gained=350,
-            retention_data=[95, 88, 72, 65, 60, 55, 52, 50, 48, 45, 42, 40],
-            optimization_insight="Videos with the Mirror + Dynamic Zoom combo are showing 34% higher rewatch rates in the Motivation niche."
+            views=0,
+            watch_time=0.0,
+            retention_rate=0.0,
+            likes=0,
+            shares=0,
+            follows_gained=0,
+            retention_data=[0] * 12,
+            optimization_insight="No analytics data available. Publish content to start tracking performance."
         )
         
-        # Cache mock result too (for demo stability)
+        # Don't cache zero data - allow real data to take over when API keys are added
         try:
              # Only cache mock if we really want to simulate persistence, 
              # but usually we want to retry fetching real data. 

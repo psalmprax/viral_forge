@@ -15,6 +15,7 @@ from .snapchat_scanner import base_snapchat_scanner
 from .pinterest_scanner import base_pinterest_scanner
 from .linkedin_scanner import base_linkedin_scanner
 from .bilibili_scanner import base_bilibili_scanner
+from .skool_scanner import base_skool_scanner
 from .deconstructor import pattern_deconstructor
 from api.utils.database import SessionLocal
 from api.utils.models import ContentCandidateDB
@@ -38,7 +39,8 @@ class DiscoveryService:
             base_snapchat_scanner,
             base_pinterest_scanner,
             base_linkedin_scanner,
-            base_bilibili_scanner
+            base_bilibili_scanner,
+            base_skool_scanner
         ]
 
     async def find_trending_content(self, niche: str, horizon: str = "30d", tier: str = "free") -> List[ContentCandidate]:

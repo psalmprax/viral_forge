@@ -160,9 +160,12 @@ class OpenClawAgent:
                 return "⚠️ Persona generation failed: Missing persona_id"
             try:
                 # Direct internal routing for MVP
-                # Real implementation would call the local API or use a specific Skill class
+                # Uses INTERNAL_API_TOKEN from config for service-to-service auth
                 payload = {"persona_id": int(persona_id), "topic": topic}
-                response = requests.post(f"http://localhost:{settings.PORT}/api/v1/persona/generate", json=payload, headers={"Authorization": f"Bearer internal_mock_token"})
+                headers = {}
+                if settings.INTERNAL_API_TOKEN:
+                    headers["Authorization"] = f"Bearer {settings.INTERNAL_API_TOKEN}"
+                response = requests.post(f"http://localhost:{settings.PORT}/api/v1/persona/generate", json=payload, headers=headers)
                 if response.status_code == 200:
                     return f"👤 **Persona Animated!**\nVideo generated successfully.\nLink: {response.json().get('video_url')}"
                 else:

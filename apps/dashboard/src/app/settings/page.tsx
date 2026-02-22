@@ -15,7 +15,9 @@ import {
     CheckCircle2,
     Cpu,
     Loader2,
-    Layout
+    Layout,
+    User,
+    CreditCard
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { API_BASE } from "@/lib/config";
@@ -233,6 +235,8 @@ export default function SettingsPage() {
                             </>
                         )}
                         <TabItem icon={<Bell className="h-4 w-4" />} label="Notifications" active={activeTab === "Notifications"} onClick={() => setActiveTab("Notifications")} />
+                        <TabItem icon={<User className="h-4 w-4" />} label="Profile" active={activeTab === "Profile"} onClick={() => setActiveTab("Profile")} />
+                        <TabItem icon={<CreditCard className="h-4 w-4" />} label="Billing" active={activeTab === "Billing"} onClick={() => setActiveTab("Billing")} />
                     </div>
 
                     {/* Main Content Area */}
@@ -841,6 +845,208 @@ export default function SettingsPage() {
                                                 >
                                                     <div className="absolute top-1 left-1 w-3 h-3 bg-zinc-600 rounded-full" />
                                                 </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </section>
+                        ) : activeTab === "Profile" ? (
+                            <section className="space-y-6">
+                                <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-8 space-y-6">
+                                    <div className="flex items-center gap-3">
+                                        <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                                            <User className="h-5 w-5 text-primary" />
+                                        </div>
+                                        <div>
+                                            <h3 className="text-lg font-bold text-white">Profile Settings</h3>
+                                            <p className="text-xs text-zinc-500">Manage your account credentials</p>
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-4">
+                                        <div className="space-y-2">
+                                            <label className="text-sm font-bold text-zinc-400">Current Password</label>
+                                            <input
+                                                type="password"
+                                                id="currentPassword"
+                                                className="w-full bg-zinc-950/50 border border-white/10 rounded-xl py-3 px-4 text-white focus:ring-2 ring-primary/50 outline-none"
+                                                placeholder="Enter current password"
+                                            />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <label className="text-sm font-bold text-zinc-400">New Password</label>
+                                            <input
+                                                type="password"
+                                                id="newPassword"
+                                                className="w-full bg-zinc-950/50 border border-white/10 rounded-xl py-3 px-4 text-white focus:ring-2 ring-primary/50 outline-none"
+                                                placeholder="Enter new password"
+                                            />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <label className="text-sm font-bold text-zinc-400">Confirm New Password</label>
+                                            <input
+                                                type="password"
+                                                id="confirmPassword"
+                                                className="w-full bg-zinc-950/50 border border-white/10 rounded-xl py-3 px-4 text-white focus:ring-2 ring-primary/50 outline-none"
+                                                placeholder="Confirm new password"
+                                            />
+                                        </div>
+                                        <button
+                                            onClick={async () => {
+                                                const currentPassword = (document.getElementById('currentPassword') as HTMLInputElement).value;
+                                                const newPassword = (document.getElementById('newPassword') as HTMLInputElement).value;
+                                                const confirmPassword = (document.getElementById('confirmPassword') as HTMLInputElement).value;
+
+                                                if (!currentPassword || !newPassword || !confirmPassword) {
+                                                    alert('Please fill in all password fields');
+                                                    return;
+                                                }
+                                                if (newPassword !== confirmPassword) {
+                                                    alert('New passwords do not match');
+                                                    return;
+                                                }
+                                                if (newPassword.length < 6) {
+                                                    alert('Password must be at least 6 characters');
+                                                    return;
+                                                }
+
+                                                try {
+                                                    const token = localStorage.getItem('token');
+                                                    const res = await fetch(`${API_BASE}/auth/me/change-password`, {
+                                                        method: 'POST',
+                                                        headers: {
+                                                            'Content-Type': 'application/json',
+                                                            'Authorization': `Bearer ${token}`
+                                                        },
+                                                        body: JSON.stringify({
+                                                            current_password: currentPassword,
+                                                            new_password: newPassword
+                                                        })
+                                                    });
+                                                    if (res.ok) {
+                                                        alert('Password changed successfully!');
+                                                        (document.getElementById('currentPassword') as HTMLInputElement).value = '';
+                                                        (document.getElementById('newPassword') as HTMLInputElement).value = '';
+                                                        (document.getElementById('confirmPassword') as HTMLInputElement).value = '';
+                                                    } else {
+                                                        const err = await res.json();
+                                                        alert(err.detail || 'Failed to change password');
+                                                    }
+                                                } catch (e) {
+                                                    alert('Error changing password');
+                                                }
+                                            }}
+                                            className="w-full bg-primary hover:bg-primary/90 text-white font-bold py-3 px-6 rounded-xl transition-all"
+                                        >
+                                            Change Password
+                                        </button>
+                                    </div>
+                                </div>
+                            </section>
+                        ) : activeTab === "Billing" ? (
+                            <section className="space-y-6">
+                                <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-8 space-y-6">
+                                    <div className="flex items-center gap-3">
+                                        <div className="h-10 w-10 rounded-xl bg-amber-500/10 flex items-center justify-center">
+                                            <CreditCard className="h-5 w-5 text-amber-500" />
+                                        </div>
+                                        <div>
+                                            <h3 className="text-lg font-bold text-white">Subscription & Billing</h3>
+                                            <p className="text-xs text-zinc-500">Manage your subscription tier</p>
+                                        </div>
+                                    </div>
+
+                                    <div className="p-4 bg-zinc-950/50 border border-zinc-800 rounded-xl">
+                                        <div className="flex items-center justify-between mb-4">
+                                            <div>
+                                                <p className="text-sm text-zinc-400">Current Plan</p>
+                                                <p className="text-2xl font-black text-white uppercase">{userProfile.subscription}</p>
+                                            </div>
+                                            <div className={`px-3 py-1 rounded-full text-xs font-bold uppercase ${userProfile.subscription === 'premium' ? 'bg-amber-500/10 text-amber-500' : userProfile.subscription === 'basic' ? 'bg-blue-500/10 text-blue-500' : 'bg-zinc-500/10 text-zinc-500'}`}>
+                                                {userProfile.subscription === 'premium' ? 'Active' : userProfile.subscription === 'basic' ? 'Active' : 'Free Tier'}
+                                            </div>
+                                        </div>
+
+                                        <div className="space-y-3 pt-4 border-t border-zinc-800">
+                                            <p className="text-sm font-bold text-zinc-400">Available Plans</p>
+
+                                            <div className="grid gap-3">
+                                                <div className={`p-4 rounded-xl border ${userProfile.subscription === 'free' ? 'border-primary bg-primary/5' : 'border-zinc-800'} transition-all`}>
+                                                    <div className="flex items-center justify-between">
+                                                        <div>
+                                                            <p className="font-bold text-white">Free Tier</p>
+                                                            <p className="text-xs text-zinc-500">Basic features</p>
+                                                        </div>
+                                                        <span className="text-sm font-bold text-zinc-500">$0/mo</span>
+                                                    </div>
+                                                    {userProfile.subscription === 'free' && (
+                                                        <div className="mt-2 text-xs text-primary font-bold">Current Plan</div>
+                                                    )}
+                                                </div>
+
+                                                <div className={`p-4 rounded-xl border ${userProfile.subscription === 'basic' ? 'border-primary bg-primary/5' : 'border-zinc-800'} transition-all`}>
+                                                    <div className="flex items-center justify-between">
+                                                        <div>
+                                                            <p className="font-bold text-white">Basic</p>
+                                                            <p className="text-xs text-zinc-500">Enhanced features</p>
+                                                        </div>
+                                                        <span className="text-sm font-bold text-zinc-500">$19/mo</span>
+                                                    </div>
+                                                    {userProfile.subscription === 'basic' ? (
+                                                        <div className="mt-2 text-xs text-primary font-bold">Current Plan</div>
+                                                    ) : (
+                                                        <button
+                                                            onClick={async () => {
+                                                                const token = localStorage.getItem('token');
+                                                                const res = await fetch(`${API_BASE}/auth/me/upgrade-subscription?tier=basic`, {
+                                                                    method: 'POST',
+                                                                    headers: { 'Authorization': `Bearer ${token}` }
+                                                                });
+                                                                if (res.ok) {
+                                                                    setUserProfile({ ...userProfile, subscription: 'basic' });
+                                                                    alert('Upgraded to Basic!');
+                                                                } else {
+                                                                    alert('Upgrade failed');
+                                                                }
+                                                            }}
+                                                            className="mt-2 text-xs bg-blue-500/10 text-blue-500 px-3 py-1 rounded-full font-bold"
+                                                        >
+                                                            Upgrade
+                                                        </button>
+                                                    )}
+                                                </div>
+
+                                                <div className={`p-4 rounded-xl border ${userProfile.subscription === 'premium' ? 'border-primary bg-primary/5' : 'border-amber-500/30'} transition-all`}>
+                                                    <div className="flex items-center justify-between">
+                                                        <div>
+                                                            <p className="font-bold text-white">Premium</p>
+                                                            <p className="text-xs text-zinc-500">Full access + priority</p>
+                                                        </div>
+                                                        <span className="text-sm font-bold text-amber-500">$49/mo</span>
+                                                    </div>
+                                                    {userProfile.subscription === 'premium' ? (
+                                                        <div className="mt-2 text-xs text-primary font-bold">Current Plan</div>
+                                                    ) : (
+                                                        <button
+                                                            onClick={async () => {
+                                                                const token = localStorage.getItem('token');
+                                                                const res = await fetch(`${API_BASE}/auth/me/upgrade-subscription?tier=premium`, {
+                                                                    method: 'POST',
+                                                                    headers: { 'Authorization': `Bearer ${token}` }
+                                                                });
+                                                                if (res.ok) {
+                                                                    setUserProfile({ ...userProfile, subscription: 'premium' });
+                                                                    alert('Upgraded to Premium!');
+                                                                } else {
+                                                                    alert('Upgrade failed');
+                                                                }
+                                                            }}
+                                                            className="mt-2 text-xs bg-amber-500/10 text-amber-500 px-3 py-1 rounded-full font-bold"
+                                                        >
+                                                            Upgrade
+                                                        </button>
+                                                    )}
+                                                </div>
                                             </div>
                                         </div>
                                     </div>

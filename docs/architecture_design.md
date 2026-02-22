@@ -279,6 +279,21 @@ GitHub (master branch)
 | Secrets | `.env` file (never committed) |
 | WS Verification | `isMounted` hook guards + 101 Handshake validation |
 | Edge Stability | Standardized Nginx `Upgrade` mapping |
+| Internal Services | Configurable `INTERNAL_API_TOKEN` for service-to-service auth |
+
+## Data Integrity & Production Readiness
+
+All system components follow strict data integrity principles:
+
+| Component | Behavior When Unconfigured |
+|---|---|
+| Discovery Scanners | Return empty list `[]` |
+| Video Synthesis | Raise `ValueError` / `NotImplementedError` |
+| Monetization CTAs | Return empty string `""` |
+| Thumbnail Generation | Raise `RuntimeError` |
+| Publish Package | Use proper UUID generation |
+
+This ensures no fake data is ever displayed to end users.
 
 ---
 
