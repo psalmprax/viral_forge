@@ -32,6 +32,10 @@ class Settings(BaseSettings):
     YOUTUBE_API_KEY: str = ""
     TIKTOK_API_KEY: str = ""
     
+    # Payment Processing
+    STRIPE_SECRET_KEY: str = ""
+    STRIPE_WEBHOOK_SECRET: str = ""
+    
     # OAuth Credentials
     GOOGLE_CLIENT_ID: str = ""
     GOOGLE_CLIENT_SECRET: str = ""

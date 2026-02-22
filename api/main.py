@@ -1,6 +1,6 @@
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-from api.routes import discovery, video, publish, analytics, auth, settings as settings_router, ws, no_face, monetization, nexus, ab_testing, security
+from api.routes import discovery, video, publish, analytics, auth, settings as settings_router, ws, no_face, monetization, nexus, ab_testing, security, billing
 from services.security.service import base_security_sentinel
 from api.config import settings
 import os
@@ -87,6 +87,7 @@ app.include_router(monetization.router)
 app.include_router(nexus.router)
 app.include_router(ab_testing.router)
 app.include_router(security.router)
+app.include_router(billing.router)
 
 @app.get("/")
 async def root():
